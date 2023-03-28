@@ -8,6 +8,7 @@ const firebase = require('firebase');
 const firebaseConfig = require('../routes/firebaseConfig')
 const db = firebase.database()
 const cron = require('node-cron');
+const serverless = require('serverless-http')
 
 server.listen(port, () => {
   console.log(`Server is on port:${port}`)
@@ -80,3 +81,5 @@ cron.schedule('0 0 * * *', async function () {
   console.log('run')
   runAtMidnight()
 });
+
+module.exports.handler = serverless(app)
