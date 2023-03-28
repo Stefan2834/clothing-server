@@ -4,6 +4,10 @@ var http = require('http');
 var port = normalizePort(process.env.PORT || '9000');
 app.set('port', port);
 var server = http.createServer(app);
+const firebase = require('firebase');
+const firebaseConfig = require('../routes/firebaseConfigTest')
+const db = firebase.database()
+const cron = require('node-cron');
 
 server.listen(port, () => {
   console.log(`Server is on port:${port}`)
@@ -55,3 +59,24 @@ function onListening() {
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
 }
+function runAtMidnight() {
+  const productsRef = db.ref('/product');
+  productsRef.once('value', (snapshot) => {
+      const product = snapshot.val();
+      const randomIndex = Math.floor(Math.random() * product.length);
+      const dailyProduct = product[randomIndex];
+      const dailyProductRef = db.ref('dailyProduct');
+      dailyProductRef.set(dailyProduct, (error) => {
+          if (error) {
+              console.error('Error setting daily product:', error);
+          } else {
+              console.log(`Set daily product to ${dailyProduct.id}`);
+          }
+      });
+  });
+}
+
+cron.schedule('0 0 * * *', async function () {
+  console.log('run')
+  runAtMidnight()
+});
