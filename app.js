@@ -48,6 +48,7 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+const router = express.Router
 app.use('.netlify/functions/api', router)
 
 module.exports = app;
