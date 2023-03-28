@@ -1,9 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const firebase = require('firebase');
-const firebaseConfig = require('./firebaseConfigTest')
+const firebaseConfig = require('./firebaseConfig')
 const db = firebase.database()
-const cron = require('node-cron');
 
 router.post('/info', async (req, res, next) => {
     const { uid } = req.body;

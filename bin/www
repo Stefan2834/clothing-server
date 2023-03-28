@@ -5,7 +5,7 @@ var port = normalizePort(process.env.PORT || '9000');
 app.set('port', port);
 var server = http.createServer(app);
 const firebase = require('firebase');
-const firebaseConfig = require('../routes/firebaseConfigTest')
+const firebaseConfig = require('../routes/firebaseConfig')
 const db = firebase.database()
 const cron = require('node-cron');
 
