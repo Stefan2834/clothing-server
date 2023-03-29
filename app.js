@@ -45,7 +45,5 @@ app.use(function (err, req, res, next) {
   res.render('error');
 });
 
-const router = express.Router
-app.use('.netlify/functions/www', router)
 
 module.exports = app;
