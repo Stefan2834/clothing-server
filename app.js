@@ -16,8 +16,6 @@ const app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-const allowedOrigins = ['http://localhost:3000',
-  'www.example2.com'];
 app.use(cors())
 
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -50,6 +48,6 @@ app.use(function (err, req, res, next) {
 });
 
 const router = express.Router
-app.use('.netlify/functions/api', router)
+app.use('.netlify/functions/www', router)
 
 module.exports = app;
