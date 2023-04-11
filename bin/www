@@ -78,6 +78,6 @@ function runAtMidnight() {
 }
 
 cron.schedule('0 0 * * *', async function () {
-  console.log('run')
+  console.log('Daily product has changed')
   runAtMidnight()
 });

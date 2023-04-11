@@ -25,7 +25,9 @@ router.post('/infoUpdate', (req, res, next) => {
             info: det.info,
             tel: det.tel,
             email: det.email,
-            name: det.name
+            name: det.name,
+            type: det.type,
+            county: det.county
         })
         res.json({ success: true })
     } catch (err) {
@@ -75,6 +77,31 @@ router.post('/cart/add', (req, res, next) => {
     try {
         const ref = db.ref('/users/' + uid + '/cart')
         ref.set(cart)
+        res.json({ succes: true })
+    } catch (err) {
+        res.json({ succes: false, message: err })
+    }
+})
+
+router.post('/command/get', (req, res, next) => {
+    const { uid } = req.body
+    try {
+        const commandRef = db.ref('/users/' + uid + '/command/');
+        commandRef.once('value', (snapshot) => {
+            const info = snapshot.val();
+            res.json({ command: info })
+        });
+    } catch (err) {
+        res.json({ succces: false, message: err })
+    }
+})
+
+
+router.post('/command/add', (req, res, next) => {
+    const { command, uid, email } = req.body
+    try {
+        const ref = db.ref('/users/' + uid + '/command')
+        ref.set(command)
         res.json({ succes: true })
     } catch (err) {
         res.json({ succes: false, message: err })

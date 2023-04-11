@@ -1,4 +1,0 @@
-[build]
-  command = "npm start"
-  functions = "bin"
-  publish = "views/"
