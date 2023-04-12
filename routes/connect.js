@@ -2,77 +2,90 @@ const express = require('express');
 const router = express.Router();
 const firebase = require('firebase');
 const firebaseConfig = require('./firebaseConfig')
-const auth  = firebase.auth()
+const auth = firebase.auth()
 const db = firebase.database()
 
-router.get('/', (req,res,next) => {
-  try {
-    auth.onAuthStateChanged(user => {
-      if(user) {
-        res.json({user: user})
-      }
-      else res.json({error: 'You need to connect firstly'})
+
+router.post('/signUp', (req, res, next) => {
+  const { email, password } = req.body;
+  auth.createUserWithEmailAndPassword(email, password)
+    .then(userCredential => {
+      userCredential.user.sendEmailVerification()
+        .then(() => {
+          console.log('Email verification link sent');
+          res.json({ success: true, message: 'Utilizator creat', user: userCredential })
+        })
+        .catch((error) => {
+          console.error('Error sending email verification link:', error);
+          res.json({ success: false, message: error })
+        });
     })
-  } catch(err) {
-    res.json({user:err});
+    .catch(err => {
+      if (err.code === "auth/email-already-exists") {
+        res.json({ success: false, message: "Email deja folosit" });
+      } else {
+        res.json({ success: false, message: err })
+      }
+    })
+});
+
+
+router.post('/login', (req, res, next) => {
+  const { email, password } = req.body;
+  auth.signInWithEmailAndPassword(email, password)
+    .then(userCredential => {
+      if (userCredential.user.emailVerified) {
+        const user = JSON.stringify(userCredential.user);
+        res.cookie('userData', user, { maxAge: 10 * 365 * 24 * 60 * 60 * 1000, httpOnly: false, path:'/' });
+        res.json({ success: true, message: 'Logat cu succes'});
+      } else {
+        res.json({ success: false, message: 'Contul nu este activat. Acceseaza emailul pentru a il activa' })
+      }
+    })
+    .catch((err) => {
+      console.log(err)
+      if (err.code === 'auth/wrong-password') {
+        res.json({ success: false, message: 'Parola sau emailul gresit' })
+      } else if (err.code === 'auth/user-not-found') {
+        res.json({ success: false, message: 'Acest cont nu exista' })
+      } else {
+        res.json({ success: false, message: err.code })
+      }
+    });
+})
+
+router.post('/logout', (req, res, next) => {
+  auth.signOut()
+  .then(() => {
+      res.json({ success: true, message: 'Te-ai deconectat cu succes' })
+    })
+    .catch(err => {
+      res.json({ success: false, message: err })
+    })
+})
+router.get('/cookie', (req,res,next) => {
+  try {
+    res.clearCookie('userData')
+  } catch (err) {
+    res.json({success:false})
   }
 })
 
-router.post('/signUp',(req, res, next) => {
-  const { email, password } = req.body;
-  auth.createUserWithEmailAndPassword(email,password)
-  .then(user => {
-    res.json({success:true, message:'User created succesfuly', user:user})
-  })
-  .catch(err => {
-    if (err.code === "auth/email-already-exists") {
-      res.json({ success: false, message: "Email already in use" });
-    } else {
-      res.json({succes:false, message:err.message})
-    }
-  })
-});
-
-router.post('/login',(req,res,next) => {
-  const { email, password } = req.body;
-  auth.signInWithEmailAndPassword(email, password)
-  .then((user) => {
-    res.json({success:true, message: 'Login successful', user:user });
-  })
-  .catch((err) => {
-    if(err.code === 'auth/wrong-password') {
-      res.json({success:false, message:'Wrong Password'})
-    } else if(err.code === 'auth/user-not-found') {
-      res.json({success:false, message:'User not found'})
-    } else {
-      res.json({success:false, message:err.code})
-    }
-  });
-})
-
-router.post('/logout', (req,res,next) => {
-  auth.signOut()
-  .then(() => {
-    res.json({success: true, message:'Logout succesfully'})
-  })
-  .catch(err => {
-    res.json({success: false, message: err})
-  })
-})
-
-router.post('/write', async (req,res,next) => {
+router.post('/write', async (req, res, next) => {
   const { uid, password, email, name, type } = req.body;
   try {
     const ref = db.ref('/users/' + uid + '/');
-    await ref.set({email:email, password: password,
-      det:{info:'', tel:'', email:email, name:name, type: type}
+    await ref.set({
+      email: email, password: password,
+      det: { info: '', tel: '', email: email, name: name, type: type }
     });
-    res.json({success: true})
+    res.json({ success: true })
   } catch (err) {
-    res.json({success: false, message:err})
+    res.json({ success: false, message: err })
   }
 })
 
 
 
 module.exports = router;
+

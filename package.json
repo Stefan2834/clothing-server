@@ -3,8 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./bin/www",
-    "build": "npx netlify deploy --prod"
+    "start": "nodemon ./bin/www"
   },
   "dependencies": {
     "@sendinblue/client": "^3.3.1",

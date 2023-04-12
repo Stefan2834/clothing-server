@@ -10,9 +10,10 @@ const indexRouter = require('./routes/index');
 const connectRouter = require('./routes/connect');
 const userRouter = require('./routes/user');
 const suggestionRoute = require('./routes/suggestion')
+const emailRoute = require('./routes/email')
 const app = express();
+app.use(cors({ credentials: true, origin: 'http://localhost:3000' }));
 
-// view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
@@ -29,6 +30,7 @@ app.use('/', indexRouter);
 app.use('/connect', connectRouter);
 app.use('/user', userRouter);
 app.use('/suggestion', suggestionRoute)
+app.use('/email', emailRoute)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
