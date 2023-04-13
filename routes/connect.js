@@ -48,10 +48,8 @@ router.post('/login', (req, res, next) => {
   auth.signInWithEmailAndPassword(email, password)
     .then(userCredential => {
       if (userCredential.user.emailVerified) {
-        const user = JSON.stringify(userCredential.user);
-        res.cookie('userData', user, { maxAge: 10 * 365 * 24 * 60 * 60 * 1000, httpOnly: false, path: '/' });
-        console.log('test')
-        res.json({ success: true, message: 'Logat cu succes' });
+        const user = userCredential.user;
+        res.json({ success: true, message: 'Logat cu succes', user: user });
       } else {
         res.json({ success: false, message: 'Contul nu este activat. Acceseaza emailul pentru a il activa' })
       }
@@ -115,13 +113,6 @@ router.post('/resendEmail', async (req, res, next) => {
     })
 })
 
-router.get('/cookie', (req, res, next) => {
-  try {
-    res.clearCookie('userData')
-  } catch (err) {
-    res.json({ success: false })
-  }
-})
 
 router.post('/write', async (req, res, next) => {
   const { uid, password, email, name, type } = req.body;
