@@ -50,6 +50,7 @@ router.post('/login', (req, res, next) => {
       if (userCredential.user.emailVerified) {
         const user = JSON.stringify(userCredential.user);
         res.cookie('userData', user, { maxAge: 10 * 365 * 24 * 60 * 60 * 1000, httpOnly: false, path: '/' });
+        console.log('test')
         res.json({ success: true, message: 'Logat cu succes' });
       } else {
         res.json({ success: false, message: 'Contul nu este activat. Acceseaza emailul pentru a il activa' })
