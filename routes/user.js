@@ -21,6 +21,7 @@ router.post('/infoUpdate', (req, res, next) => {
     const { det, uid } = req.body
     try {
         const ref = db.ref('/users/' + uid + '/det')
+        console.log(det, uid)
         ref.set({
             info: det.info,
             tel: det.tel,
@@ -32,6 +33,8 @@ router.post('/infoUpdate', (req, res, next) => {
         })
         res.json({ success: true })
     } catch (err) {
+        console.log(err)
+
         res.json({ success: false, message: err })
     }
 })
