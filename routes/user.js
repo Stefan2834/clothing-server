@@ -27,7 +27,8 @@ router.post('/infoUpdate', (req, res, next) => {
             email: det.email,
             name: det.name,
             type: det.type,
-            county: det.county
+            county: det.county,
+            newsLetter:det.newsLetter
         })
         res.json({ success: true })
     } catch (err) {
