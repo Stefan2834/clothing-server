@@ -12,8 +12,8 @@ const suggestionRoute = require('./routes/suggestion')
 const emailRoute = require('./routes/email')
 const app = express();
 app.use(function(req, res, next) {
-  // res.setHeader('Access-Control-Allow-Origin', 'https://clothing-shop2834.web.app')
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.setHeader('Access-Control-Allow-Origin', 'https://clothing-shop2834.web.app')
+  // res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Access-Control-Allow-Credentials', true);
