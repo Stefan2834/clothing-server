@@ -37,7 +37,7 @@ router.post('/signUp', (req, res, next) => {
       if (err.code === "auth/email-already-exists") {
         res.json({ success: false, message: "Email deja folosit" });
       } else {
-        res.json({ success: false, message: err })
+        res.json({ success: false, message: err.code })
       }
     })
 });
@@ -76,6 +76,44 @@ router.post('/logout', (req, res, next) => {
       res.json({ success: false, message: err })
     })
 })
+
+router.post('/reset', async (req, res, next) => {
+  const { email } = req.body
+  try {
+    await auth.sendPasswordResetEmail(email);
+    res.json({ success: true, message: `Emailul a fost trimis la ${email}` })
+  } catch (err) {
+    if (err.code === 'auth/invalid-email') {
+      res.json({ success: false, message: 'Emailul este invalid' })
+    } else {
+      res.json({ success: false, message: err.code })
+    }
+  }
+})
+router.post('/resendEmail', async (req, res, next) => {
+  const { email, password } = req.body
+  await auth.signInWithEmailAndPassword(email, password)
+    .then(userCredential => {
+      userCredential.user.sendEmailVerification()
+        .then(() => {
+          console.log('Email verification link sent');
+          res.json({ success: true, message: 'Email trimis cu succes' })
+        })
+        .catch((error) => {
+          console.error('Emailul nu a putut fi trimis:', error);
+          res.json({ success: false, message: error })
+        });
+    }).catch(err => {
+      if (err.code === 'auth/user-not-found') {
+        res.json({ success: false, message: 'Utilizatorul nu exista' })
+      } else if (err.code === 'auth/wrong-password') {
+        res.json({ success: false, message: 'Parola este gresita' })
+      } else {
+        res.json({ success: false, message: err.code })
+      }
+    })
+})
+
 router.get('/cookie', (req, res, next) => {
   try {
     res.clearCookie('userData')
@@ -90,7 +128,7 @@ router.post('/write', async (req, res, next) => {
     const ref = db.ref('/users/' + uid + '/');
     await ref.set({
       email: email, password: password,
-      det: { info: '', tel: '', email: email, name: name, type: type, newsLetter:false }
+      det: { info: '', tel: '', email: email, name: name, type: type, newsLetter: false }
     });
     res.json({ success: true })
   } catch (err) {
