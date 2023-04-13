@@ -4,7 +4,6 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
-const cors = require('cors')
 
 const indexRouter = require('./routes/index');
 const connectRouter = require('./routes/connect');
@@ -12,12 +11,17 @@ const userRouter = require('./routes/user');
 const suggestionRoute = require('./routes/suggestion')
 const emailRoute = require('./routes/email')
 const app = express();
-app.use(cors({ credentials: true, origin: 'http://localhost:3000' }));
+app.use(function(req, res, next) {
+  res.setHeader('Access-Control-Allow-Origin', 'https://clothing-shop2834.web.app');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  next();
+});
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-app.use(cors())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(logger('dev'));
