@@ -18,10 +18,10 @@ router.post('/info', async (req, res, next) => {
             commandRef.once('value'),
         ]);
         const data = {
-            det: detSnap.val(),
-            fav: favSnap.val(),
-            cart: cartSnap.val(),
-            command: commandSnap.val(),
+            det: detSnap.val() || [],
+            fav: favSnap.val() || [],
+            cart: cartSnap.val() || [],
+            command: commandSnap.val() || [],
         };
         res.json({ success: true, data: data })
     } catch (err) {

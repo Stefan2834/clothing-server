@@ -24,7 +24,7 @@ router.post('/commands', async (req, res, next) => {
     const commandsRef = db.ref('commands')
     await commandsRef.set(commands)
   } catch (err) {
-    req.json({success: false, message: err})
+    req.json({ success: false, message: err })
   }
 })
 
@@ -38,4 +38,33 @@ router.post(`/status`, async (req, res, next) => {
     res.json({ succes: false, message: err })
   }
 })
+
+router.get('/errors', async (req, res, next) => {
+  try {
+    const ref = db.ref('errors')
+    ref.once('value', (snapshot) => {
+      const errors = snapshot.val();
+      console.log(errors);
+      res.json({ success: true, errors: errors })
+    });
+  } catch (err) {
+    res.json({ success: false, message: err })
+  }
+})
+
+router.delete('/errors', async (req, res, next) => {
+  const { id } = req.body
+  try {
+    const ref = db.ref('errors');
+    ref.once('value', snapshot => {
+      const errors = snapshot.val() || []
+      errors.splice(id, 1)
+      console.log(errors)
+      ref.set(errors);
+    })
+    res.json({ success: true, message: 'Error deleted successfully' });
+  } catch (err) {
+    res.json({ success: false, message: err });
+  }
+});
 module.exports = router;
