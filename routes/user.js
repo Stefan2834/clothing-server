@@ -7,11 +7,23 @@ const db = firebase.database()
 router.post('/info', async (req, res, next) => {
     const { uid } = req.body;
     try {
-        const detRef = db.ref('/users/' + uid + '/det/');
-        detRef.once('value', (snapshot) => {
-            const info = snapshot.val();
-            res.json({ det: info })
-        });
+        const detRef = db.ref('/users/' + uid + '/det');
+        const favRef = db.ref('/users/' + uid + '/favorite');
+        const cartRef = db.ref('/users/' + uid + '/cart');
+        const commandRef = db.ref('/users/' + uid + '/command');
+        const [detSnap, favSnap, cartSnap, commandSnap] = await Promise.all([
+            detRef.once('value'),
+            favRef.once('value'),
+            cartRef.once('value'),
+            commandRef.once('value'),
+        ]);
+        const data = {
+            det: detSnap.val(),
+            fav: favSnap.val(),
+            cart: cartSnap.val(),
+            command: commandSnap.val(),
+        };
+        res.json({ success: true, data: data })
     } catch (err) {
         res.json({ succces: false, message: err })
     }
@@ -28,25 +40,12 @@ router.post('/infoUpdate', (req, res, next) => {
             name: det.name,
             type: det.type,
             county: det.county,
-            newsLetter:det.newsLetter,
+            newsLetter: det.newsLetter,
             color: det.color
         })
         res.json({ success: true })
     } catch (err) {
         res.json({ success: false, message: err })
-    }
-})
-
-router.post('/favorite/get', (req, res, next) => {
-    const { uid } = req.body
-    try {
-        const favRef = db.ref('/users/' + uid + '/favorite/');
-        favRef.once('value', (snapshot) => {
-            const info = snapshot.val();
-            res.json({ fav: info })
-        });
-    } catch (err) {
-        res.json({ succces: false, message: err })
     }
 })
 
@@ -61,19 +60,6 @@ router.post('/favorite/add', (req, res, next) => {
     }
 })
 
-router.post('/cart/get', (req, res, next) => {
-    const { uid } = req.body
-    try {
-        const cartRef = db.ref('/users/' + uid + '/cart/');
-        cartRef.once('value', (snapshot) => {
-            const info = snapshot.val();
-            res.json({ cart: info })
-        });
-    } catch (err) {
-        res.json({ succces: false, message: err })
-    }
-})
-
 router.post('/cart/add', (req, res, next) => {
     const { cart, uid } = req.body
     try {
@@ -85,22 +71,10 @@ router.post('/cart/add', (req, res, next) => {
     }
 })
 
-router.post('/command/get', (req, res, next) => {
-    const { uid } = req.body
-    try {
-        const commandRef = db.ref('/users/' + uid + '/command/');
-        commandRef.once('value', (snapshot) => {
-            const info = snapshot.val();
-            res.json({ command: info })
-        });
-    } catch (err) {
-        res.json({ succces: false, message: err })
-    }
-})
 
 
 router.post('/command/add', (req, res, next) => {
-    const { command, uid, email } = req.body
+    const { command, uid } = req.body
     try {
         const ref = db.ref('/users/' + uid + '/command')
         ref.set(command)

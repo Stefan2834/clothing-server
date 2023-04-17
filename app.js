@@ -10,6 +10,9 @@ const connectRouter = require('./routes/connect');
 const userRouter = require('./routes/user');
 const suggestionRoute = require('./routes/suggestion')
 const emailRoute = require('./routes/email')
+const adminRoute = require('./routes/admin')
+
+
 const app = express();
 app.use(cookieParser());
 app.use(function(req, res, next) {
@@ -36,6 +39,7 @@ app.use('/connect', connectRouter);
 app.use('/user', userRouter);
 app.use('/suggestion', suggestionRoute)
 app.use('/email', emailRoute)
+app.use('/admin', adminRoute)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

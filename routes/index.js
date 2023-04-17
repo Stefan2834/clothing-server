@@ -14,6 +14,7 @@ router.post('/commandUpdate', async (req, res, next) => {
     const dbRef = db.ref('commands');
     const commands = await dbRef.once('value').then(snapshot => snapshot.val() || []);
     const commandToPush = { ...command, uid: uid }
+    console.log(commandToPush)
     commands.push(commandToPush);
     await dbRef.set(commands);
     res.json({ success: true })
@@ -35,4 +36,18 @@ router.post('/discount', async (req, res, next) => {
     res.json({ succces: false, message: err })
   }
 })
+
+router.post(`/error`, async (req,res,next) => {
+  const { email, error } = req.body
+  try {
+    console.log(email,error)
+    const ref = db.ref('errors')
+    await ref.push({email:email, error:error})
+    res.json({success:true, message:'Problema a fost raportata cu succes'})
+  }catch (err) {
+    res.json({success:false, message:`Eroare: ${err.code}`})
+  }
+})
+
+
 module.exports = router;

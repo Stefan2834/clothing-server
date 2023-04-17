@@ -9,7 +9,12 @@ router.get('/', (req, res, next) => {
   try {
     auth.onAuthStateChanged(function (user) {
       if (user) {
-        res.json({ success: true, messages: 'Connected' })
+        console.log(user.user)
+        if (user.email === 'iosifstefan220@gmail.com' || user.email === 'renjibenji2007@gmail.com') {
+          res.json({ success: true, message: 'Connected', admin: true })
+        } else {
+          res.json({ success: true, messages: 'Connected', admin: false })
+        }
       } else {
         res.json({ success: false, message: 'You are not connected' })
       }
@@ -120,7 +125,7 @@ router.post('/write', async (req, res, next) => {
     const ref = db.ref('/users/' + uid + '/');
     await ref.set({
       email: email, password: password,
-      det: { info: '', tel: '', email: email, name: name, type: type, newsLetter: false, county:'', color:"#ea580c" }
+      det: { info: '', tel: '', email: email, name: name, type: type, newsLetter: false, county: '', color: "#ea580c" }
     });
     res.json({ success: true })
   } catch (err) {
