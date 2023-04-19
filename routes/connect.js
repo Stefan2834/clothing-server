@@ -5,24 +5,24 @@ const firebaseConfig = require('./firebaseConfig')
 const auth = firebase.auth()
 const db = firebase.database()
 
-// router.post('/', (req, res, next) => {
-//   try {
-//     auth.onAuthStateChanged(function (user) {
-//       if (user) {
-//         console.log(user.user)
-//         if (user.email === 'iosifstefan220@gmail.com' || user.email === 'renjibenji2007@gmail.com') {
-//           res.json({ success: true, message: 'Connected', admin: true })
-//         } else {
-//           res.json({ success: true, messages: 'Connected', admin: false })
-//         }
-//       } else {
-//         res.json({ success: false, message: 'You are not connected' })
-//       }
-//     })
-//   } catch (err) {
-//     res.json({ success: false, message: err })
-//   }
-// })
+router.post('/', (req, res, next) => {
+  try {
+    auth.onAuthStateChanged(function (user) {
+      if (user) {
+        console.log(user.user)
+        if (user.email === 'iosifstefan220@gmail.com' || user.email === 'renjibenji2007@gmail.com') {
+          res.json({ success: true, message: 'Connected', admin: true })
+        } else {
+          res.json({ success: true, messages: 'Connected', admin: false })
+        }
+      } else {
+        res.json({ success: false, message: 'You are not connected' })
+      }
+    })
+  } catch (err) {
+    res.json({ success: false, message: err })
+  }
+})
 
 router.post('/signUp', (req, res, next) => {
   const { email, password } = req.body;
