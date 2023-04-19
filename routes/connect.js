@@ -5,7 +5,7 @@ const firebaseConfig = require('./firebaseConfig')
 const auth = firebase.auth()
 const db = firebase.database()
 
-router.post('/', (req, res, next) => {
+router.get('/', (req, res, next) => {
   try {
     auth.onAuthStateChanged(function (user) {
       if (user) {
