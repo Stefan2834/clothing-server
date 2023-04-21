@@ -39,6 +39,33 @@ router.post(`/status`, async (req, res, next) => {
   }
 })
 
+router.get('/discount', async (req, res, next) => {
+  try {
+    const ref = db.ref('discount')
+    await ref.once('value', snapshot => {
+      const discount = snapshot.val()
+      const discountArray = Object.entries(discount).map(([code, { value }]) => ({ code, value }));
+      res.json({succes:true, discount: discountArray })
+    })
+  } catch (err) {
+    res.json({success:false, message:`Eroare:${err.code}`})
+  }
+})
+
+router.post('/discount', async (req, res, next) => {
+  const { value, code } = req.body
+  try {
+    const ref = db.ref('discount')
+    await ref.once('value', snapshot => {
+      const discount = snapshot.val()
+      ref.set({...discount, [code]:{value:value,user:[]}})
+      res.json({succes:true, message:'Codul a fost creat  cu succes'})
+    })
+  } catch (err) {
+    res.json({success:false, message:`Eroare:${err.code}`})
+  }
+})
+
 router.get('/errors', async (req, res, next) => {
   try {
     const ref = db.ref('errors')
@@ -59,7 +86,6 @@ router.delete('/errors', async (req, res, next) => {
     ref.once('value', snapshot => {
       const errors = snapshot.val() || []
       errors.splice(id, 1)
-      console.log(errors)
       ref.set(errors);
     })
     res.json({ success: true, message: 'Error deleted successfully' });

@@ -23,32 +23,55 @@ router.post('/commandUpdate', async (req, res, next) => {
 })
 
 router.post('/discount', async (req, res, next) => {
-  const { discountCode } = req.body
+  const { discountCode, email } = req.body;
   try {
-    const discountRef = db.ref('discount');
-    await discountRef.once('value', (snapshot) => {
-      const value = snapshot.val();
-      const discount = value[discountCode] || 0;
-      res.json({ succes: true, discount: discount })
-    });
+    const discountRef = db.ref(`discount/${discountCode}`);
+    const snapshot = await discountRef.once('value');
+    const discount = snapshot.val();
+
+    if (!discount) {
+      res.json({ success: false, message: "Codul este gresit sau a expirat" });
+      return;
+    }
+
+    const oldUser = Object.values(discount.user || []);
+    if (oldUser.includes(email)) {
+      res.json({ success: false, message: 'Ai mai folosit acest cod' });
+      return;
+    } else {
+      res.json({ success: true, discount: discount.value });
+      return
+    }
+
   } catch (err) {
-    res.json({ succces: false, message: err })
+    res.json({ success: false, message: err.code });
+  }
+});
+
+router.post('/discountOnce', async (req, res, next) => {
+  const { email, code } = req.body
+  try {
+    console.log(code)
+    const discountRef = db.ref('discount/' + code + '/user/')
+    discountRef.push(email)
+  } catch (err) {
+
   }
 })
 
-router.post(`/error`, async (req,res,next) => {
+router.post(`/error`, async (req, res, next) => {
   const { email, error } = req.body
   try {
-    console.log(email,error)
+    console.log(email, error)
     const ref = db.ref('errors')
     ref.once('value', snapshot => {
       const errors = snapshot.val() || []
-      errors.push({email:email, error:error})
+      errors.push({ email: email, error: error })
       ref.set(errors)
     })
-    res.json({success:true, message:'Problema a fost raportata cu succes'})
-  }catch (err) {
-    res.json({success:false, message:`Eroare: ${err.code}`})
+    res.json({ success: true, message: 'Problema a fost raportata cu succes' })
+  } catch (err) {
+    res.json({ success: false, message: `Eroare: ${err.code}` })
   }
 })
 
