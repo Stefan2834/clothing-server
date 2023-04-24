@@ -25,7 +25,7 @@ router.post('/command', async (req, res, next) => {
       })
       .catch((error) => {
         console.log('Error sending email', error)
-        res.json({succes:false, messages:`Error sending email:${error}`});
+        res.json({ succes: false, messages: `Error sending email:${error}` });
       });
   } catch (err) {
     res.json({ success: false, message: err })
@@ -46,7 +46,28 @@ router.post('/newsLetter', async (req, res, next) => {
       })
       .catch((error) => {
         console.log('Error sending email', error)
-        res.json({succes:false, messages:`Error sending email:${error}`});
+        res.json({ succes: false, messages: `Error sending email:${error}` });
+      });
+  } catch (err) {
+    res.json({ success: false, message: err })
+  }
+})
+
+router.post('error', (req, res, next) => {
+  const { name, solver } = req.body
+  try {
+    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+    sendSmtpEmail.to = [{ email: name }];
+    sendSmtpEmail.templateId = 10;
+    sendSmtpEmail.params = { name: name, text: solve };
+    apiInstance.sendTransacEmail(sendSmtpEmail)
+      .then((data) => {
+        console.log('Email send succesfuly', data)
+        res.json({ success: true, messages: `Email send succesfuly ${data}` })
+      })
+      .catch((error) => {
+        console.log('Error sending email', error)
+        res.json({ succes: false, messages: `Error sending email:${error}` });
       });
   } catch (err) {
     res.json({ success: false, message: err })

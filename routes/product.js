@@ -42,7 +42,7 @@ router.post(`/review/post`, async (req, res, next) => {
     const starRef = db.ref(`/product/${id}/star/`)
     await starRef.once('value', snapshot => {
       const star = snapshot.val()
-      const newStar = { nr: star.nr + 1, total: review.star + 1 }
+      const newStar = { nr: star.nr + 1, total: star.total + review.star }
       starRef.set(newStar)
       res.json({ success: true, star: newStar })
     })

@@ -5,19 +5,17 @@ const firebaseConfig = require('./firebaseConfig')
 const db = firebase.database()
 
 
-
-router.get('/commands', async (req, res, next) => {
+router.get(`/commands`, async (req, res, next) => {
   try {
-    const commandsRef = db.ref('commands');
-    await commandsRef.once('value', (snapshot) => {
-      const commands = snapshot.val();
-      res.json({ succes: true, commands: commands })
-    });
+    const commandsRef = db.ref("commands/")
+    await commandsRef.once("value", snapshot => {
+      const commands = snapshot.val() || []
+      res.json({ success: true, commands: commands })
+    })
   } catch (err) {
-    res.json({ succces: false, message: err })
+    res.json({ success: false, message: err })
   }
 })
-
 router.post('/commands', async (req, res, next) => {
   const { commands } = req.body
   try {
@@ -45,10 +43,10 @@ router.get('/discount', async (req, res, next) => {
     await ref.once('value', snapshot => {
       const discount = snapshot.val()
       const discountArray = Object.entries(discount).map(([code, { value }]) => ({ code, value }));
-      res.json({succes:true, discount: discountArray })
+      res.json({ succes: true, discount: discountArray })
     })
   } catch (err) {
-    res.json({success:false, message:`Eroare:${err.code}`})
+    res.json({ success: false, message: `Eroare:${err.code}` })
   }
 })
 
@@ -58,11 +56,11 @@ router.post('/discount', async (req, res, next) => {
     const ref = db.ref('discount')
     await ref.once('value', snapshot => {
       const discount = snapshot.val()
-      ref.set({...discount, [code]:{value:value,user:[]}})
-      res.json({succes:true, message:'Codul a fost creat  cu succes'})
+      ref.set({ ...discount, [code]: { value: value, user: [] } })
+      res.json({ succes: true, message: 'Codul a fost creat  cu succes' })
     })
   } catch (err) {
-    res.json({success:false, message:`Eroare:${err.code}`})
+    res.json({ success: false, message: `Eroare:${err.code}` })
   }
 })
 
@@ -71,7 +69,6 @@ router.get('/errors', async (req, res, next) => {
     const ref = db.ref('errors')
     ref.once('value', (snapshot) => {
       const errors = snapshot.val();
-      console.log(errors);
       res.json({ success: true, errors: errors })
     });
   } catch (err) {
@@ -93,4 +90,6 @@ router.delete('/errors', async (req, res, next) => {
     res.json({ success: false, message: err });
   }
 });
+
+
 module.exports = router;

@@ -39,7 +39,7 @@ router.post('/signUp', (req, res, next) => {
         });
     })
     .catch(err => {
-      if (err.code === "auth/email-already-exists") {
+      if (err.code === "auth/email-already-in-use") {
         res.json({ success: false, message: "Email deja folosit" });
       } else {
         res.json({ success: false, message: err.code })
