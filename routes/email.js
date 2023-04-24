@@ -58,7 +58,7 @@ router.post('/error', (req, res, next) => {
   try {
     const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
     sendSmtpEmail.to = [{ email: name }];
-    sendSmtpEmail.templateId = 10;
+    sendSmtpEmail.templateId = 11;
     sendSmtpEmail.params = { name: name, text: solve };
     apiInstance.sendTransacEmail(sendSmtpEmail)
       .then((data) => {
