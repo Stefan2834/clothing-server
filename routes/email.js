@@ -53,8 +53,8 @@ router.post('/newsLetter', async (req, res, next) => {
   }
 })
 
-router.post('error', (req, res, next) => {
-  const { name, solver } = req.body
+router.post('/error', (req, res, next) => {
+  const { name, solve } = req.body
   try {
     const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
     sendSmtpEmail.to = [{ email: name }];
