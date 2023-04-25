@@ -4,7 +4,6 @@ const firebase = require('firebase');
 const firebaseConfig = require('./firebaseConfig')
 const db = firebase.database()
 
-
 router.get(`/commands`, async (req, res, next) => {
   try {
     const commandsRef = db.ref("commands/")
@@ -90,6 +89,32 @@ router.delete('/errors', async (req, res, next) => {
     res.json({ success: false, message: err });
   }
 });
+
+router.post(`/product`, async (req, res, next) => {
+  const { newProduct } = req.body
+  try {
+    console.log(newProduct.size)
+    const productRef = db.ref(`/product/${newProduct.id}`)
+    productRef.set({
+      name: newProduct.name,
+      id: newProduct.id,
+      photo: newProduct.photo[0],
+      color: newProduct.color,
+      discount: newProduct.discount / 100,
+      price: Number(newProduct.price) - 0.01,
+      sex: newProduct.sex,
+      sliderPhoto: [newProduct.photo[1],newProduct.photo[2],newProduct.photo[3]],
+      type: newProduct.type,
+      spec: newProduct.spec,
+      star: {total:0, nr:0},
+      size: newProduct.size
+    })
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error uploading file: ', err);
+    res.json({ success: false, message: err.message });
+  }
+})
 
 
 module.exports = router;
