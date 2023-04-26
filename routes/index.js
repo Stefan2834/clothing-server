@@ -3,6 +3,8 @@ var router = express.Router();
 const firebase = require('firebase');
 const firebaseConfig = require('./firebaseConfig')
 const db = firebase.database()
+const stripe = require('stripe')('sk_test_51N0nLNJak7XWs1IO8u8wQQjt9OoUFdDz2i5kdoBxsYRa41Cnc80Loj0I1Ipfn8i6hRNzGIt1NlcPqj0R8sJ6a5T300hBszp6s1');
+
 
 router.get('/', function (req, res, next) {
   res.render('index', { title: 'Welcome to server' });
@@ -74,6 +76,73 @@ router.post(`/error`, async (req, res, next) => {
     res.json({ success: false, message: `Eroare: ${err.code}` })
   }
 })
+
+
+
+router.post('/charge', async (req, res) => {
+  try {
+    const { amount, token } = req.body;
+
+    const charge = await stripe.charges.create({
+      amount,
+      currency: 'USD',
+      description: 'Example charge',
+      source: token.id,
+    });
+
+    res.json({ success: true, message: 'Payment successful' });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: `Payment failed: ${err}` });
+  }
+});
+
+router.post('/create-checkout-session', async (req, res) => {
+  const { cart, discount, total } = req.body
+  console.log(cart)
+  try {
+    // if(discount !== 0) {
+    //   cart.push({name: 'Discount', price: })
+    // }
+    cart.push({ name: 'Transport', price: total > 200 ? 0 : 20 * 100 })
+    console.log(cart)
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: cart.map(cart => {
+        if (cart.name !== 'Transport') {
+          return {
+            price_data: {
+              currency: 'ron',
+              product_data: {
+                name: cart.name,
+              },
+              unit_amount: (cart.price + 0.01 - ((cart.price + 0.01) * cart.discount) - 0.01) * 100
+            },
+            quantity: cart.number
+          }
+        } else {
+          return {
+            price_data: {
+              currency: 'ron',
+              product_data: {
+                name: cart.name,
+              },
+              unit_amount: cart.price
+            },
+            quantity: 1
+          }
+        }
+      }),
+      mode: 'payment',
+      success_url: 'https://clothing-shop2834.web.app/main', // the URL to redirect to after successful payment
+      cancel_url: 'https://clothing-shop2834.web.app/main',
+    });
+    res.json({ success: true, url: session.url });
+  } catch (err) {
+    res.json({ success: false, message: err })
+  }
+});
+
 
 
 module.exports = router;
