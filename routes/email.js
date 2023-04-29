@@ -37,7 +37,7 @@ router.post('/newsLetter', async (req, res, next) => {
   try {
     const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
     sendSmtpEmail.to = [{ email: email }];
-    sendSmtpEmail.templateId = 10;
+    sendSmtpEmail.templateId = 14;
     sendSmtpEmail.params = { name: name };
     apiInstance.sendTransacEmail(sendSmtpEmail)
       .then((data) => {
@@ -54,12 +54,12 @@ router.post('/newsLetter', async (req, res, next) => {
 })
 
 router.post('/error', (req, res, next) => {
-  const { name, solve } = req.body
+  const { name, solve, error } = req.body
   try {
     const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
     sendSmtpEmail.to = [{ email: name }];
-    sendSmtpEmail.templateId = 11;
-    sendSmtpEmail.params = { name: name, text: solve };
+    sendSmtpEmail.templateId = 13;
+    sendSmtpEmail.params = { name: name, solve: solve, error: error };
     apiInstance.sendTransacEmail(sendSmtpEmail)
       .then((data) => {
         console.log('Email send succesfuly', data)
