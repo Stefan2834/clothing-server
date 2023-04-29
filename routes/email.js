@@ -16,7 +16,7 @@ router.post('/command', async (req, res, next) => {
   try {
     const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
     sendSmtpEmail.to = [{ email: email }];
-    sendSmtpEmail.templateId = 12 ;
+    sendSmtpEmail.templateId = 12;
     sendSmtpEmail.params = { name: name, price: price };
     apiInstance.sendTransacEmail(sendSmtpEmail)
       .then((data) => {

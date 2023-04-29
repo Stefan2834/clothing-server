@@ -7,17 +7,24 @@ const stripe = require('stripe')('sk_test_51N0nLNJak7XWs1IO8u8wQQjt9OoUFdDz2i5kd
 
 
 router.get('/', function (req, res, next) {
-  res.render('index', { title: 'Welcome to server' });
+  res.render('index', { title: 'Blisst server' });
 });
 
 router.post('/commandUpdate', async (req, res, next) => {
-  const { command, uid } = req.body
+  const { command, uid, cart } = req.body
   try {
     const dbRef = db.ref('commands');
     const commands = await dbRef.once('value').then(snapshot => snapshot.val() || []);
     const commandToPush = { ...command, uid: uid }
     commands.push(commandToPush);
     await dbRef.set(commands);
+    await cart.map(async cart => {
+      const productRef = db.ref(`/product/${cart.id}/size/${cart.selectedSize}/`)
+      await productRef.once("value", snapshot => {
+        const oldStoc = snapshot.val()
+        productRef.set(oldStoc - cart.number)
+      })
+    })
     res.json({ success: true })
   } catch (err) {
     res.json({ success: false, message: err })
@@ -79,32 +86,10 @@ router.post(`/error`, async (req, res, next) => {
 
 
 
-router.post('/charge', async (req, res) => {
-  try {
-    const { amount, token } = req.body;
-
-    const charge = await stripe.charges.create({
-      amount,
-      currency: 'USD',
-      description: 'Example charge',
-      source: token.id,
-    });
-
-    res.json({ success: true, message: 'Payment successful' });
-  } catch (err) {
-    console.error(err);
-    res.json({ success: false, message: `Payment failed: ${err}` });
-  }
-});
-
 router.post('/create-checkout-session', async (req, res) => {
-  const { cart, commandData } = req.body
+  const { commandData } = req.body
   try {
     const newCommand = encodeURIComponent(JSON.stringify(commandData));
-    cart.push({
-      name: 'Transport',
-      price: commandData.price.productPrice > 200 ? 0 : 20 * 100,
-    })
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [{
@@ -118,11 +103,14 @@ router.post('/create-checkout-session', async (req, res) => {
         quantity: 1,
       }],
       mode: 'payment',
-      success_url: `https://clothing-shop2834.web.app/creditCard/${newCommand}`, // the URL to redirect to after successful payment
-      cancel_url: 'https://clothing-shop2834.web.app/main',
+      success_url: `http://localhost:3000/creditCard/${newCommand}`,
+      cancel_url: 'http://localhost:3000/main',
+      // success_url: `https://clothing-shop2834.web.app/creditCard/${newCommand}`,
+      // cancel_url: 'https://clothing-shop2834.web.app/main'
     });
     res.json({ success: true, url: session.url });
   } catch (err) {
+    console.log(err)
     res.json({ success: false, message: err })
   }
 });

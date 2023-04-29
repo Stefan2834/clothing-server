@@ -75,12 +75,13 @@ router.get('/errors', async (req, res, next) => {
   }
 })
 
-router.delete('/errors', async (req, res, next) => {
+router.post('/errors', async (req, res, next) => {
   const { id } = req.body
   try {
-    const ref = db.ref('errors');
+    const ref = db.ref('errors/');
     ref.once('value', snapshot => {
       const errors = snapshot.val() || []
+      console.log(`ID: ${id}`)
       errors.splice(id, 1)
       ref.set(errors);
     })
