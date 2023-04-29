@@ -93,7 +93,6 @@ router.delete('/errors', async (req, res, next) => {
 router.post(`/product`, async (req, res, next) => {
   const { newProduct } = req.body
   try {
-    console.log(newProduct.size)
     const productRef = db.ref(`/product/${newProduct.id}`)
     productRef.set({
       name: newProduct.name,
