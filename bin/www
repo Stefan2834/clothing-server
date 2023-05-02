@@ -67,13 +67,8 @@ function runAtMidnight() {
       const randomIndex = Math.floor(Math.random() * product.length);
       const dailyProduct = product[randomIndex];
       const dailyProductRef = db.ref('dailyProduct');
-      dailyProductRef.set(dailyProduct, (error) => {
-          if (error) {
-              console.error('Error setting daily product:', error);
-          } else {
-              console.log(`Set daily product to ${dailyProduct.id}`);
-          }
-      });
+      dailyProductRef.set(dailyProduct.id)
+      console.log(`Produsul zilei este: ${dailyProduct.id}`)
   });
 }
 
