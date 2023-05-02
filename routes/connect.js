@@ -5,12 +5,14 @@ const firebaseConfig = require('./firebaseConfig')
 const auth = firebase.auth()
 const db = firebase.database()
 
-router.get('/', (req, res, next) => {
+router.get('/admin', async (req, res, next) => {
   try {
+    const adminRef = db.ref("/admin")
+    const snapshot = await adminRef.once('value');
+    const admins = Object.keys(snapshot.val())
     auth.onAuthStateChanged(function (user) {
       if (user) {
-        console.log(user.user)
-        if (user.email === 'iosifstefan220@gmail.com' || user.email === 'renjibenji2007@gmail.com') {
+        if (admins.includes(user.uid)) {
           res.json({ success: true, message: 'Connected', admin: true })
         } else {
           res.json({ success: true, messages: 'Connected', admin: false })

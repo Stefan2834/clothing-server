@@ -98,7 +98,7 @@ router.post('/create-checkout-session', async (req, res) => {
           product_data: {
             name: 'De plată:',
           },
-          unit_amount: JSON.parse(commandData.price.total) * 100
+          unit_amount: (JSON.parse(commandData.price.total) * 100).toFixed(0)
         },
         quantity: 1,
       }],
@@ -110,7 +110,6 @@ router.post('/create-checkout-session', async (req, res) => {
     });
     res.json({ success: true, url: session.url });
   } catch (err) {
-    console.log(err)
     res.json({ success: false, message: err })
   }
 });
