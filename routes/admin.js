@@ -103,10 +103,10 @@ router.post(`/product`, async (req, res, next) => {
       discount: (newProduct.discount / 100).toFixed(2),
       price: Number(newProduct.price) - 0.01,
       sex: newProduct.sex,
-      sliderPhoto: [newProduct.photo[1],newProduct.photo[2],newProduct.photo[3]],
+      sliderPhoto: [newProduct.photo[1], newProduct.photo[2], newProduct.photo[3]],
       type: newProduct.type,
       spec: newProduct.spec,
-      star: {total:0, nr:0},
+      star: { total: 0, nr: 0 },
       size: newProduct.size
     })
     res.json({ success: true });
@@ -116,5 +116,54 @@ router.post(`/product`, async (req, res, next) => {
   }
 })
 
+router.get('/owner', async (req, res, next) => {
+  try {
+    const ownerRef = db.ref('/owner/')
+    await ownerRef.once("value", snapshot => {
+      const owner = snapshot.val()
+      res.json({ success: true, owner: owner })
+    })
+  } catch (err) {
+    res.json({ success: false, message: err })
+  }
+})
+
+router.get('/admins', async (req, res, next) => {
+  try {
+    const adminsRef = db.ref('/admin/')
+    await adminsRef.once("value", snapshot => {
+      const admins = Object.values(snapshot.val())
+      res.json({ success: true, admins: admins })
+    })
+  } catch (err) {
+    res.json({ success: false, message: err })
+  }
+})
+
+router.post('/admins', async (req, res, next) => {
+  const { uid, email } = req.body
+  try {
+    const newAdminRef = db.ref(`/admin/${uid}/`)
+    newAdminRef.set(email)
+    res.json({ succes: true })
+  } catch (err) {
+    res.json({ success: false, message: err })
+  }
+})
+
+router.post(`/delete`, async (req, res, next) => {
+  const { email } = req.body
+  try {
+    const adminRef = db.ref('/admin/')
+    await adminRef.once("value", snapshot => {
+      const admin = snapshot.val()
+      const uidToDelete = Object.keys(admin).find(uid => admin[uid] === email);
+      adminRef.set({...admin, [uidToDelete]: null})
+    })
+    res.json({ success: true })
+  } catch (err) {
+    res.json({ success: false, message: err })
+  }
+})
 
 module.exports = router;
