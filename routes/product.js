@@ -6,11 +6,15 @@ const db = firebase.database()
 
 router.get('/', async (req, res, next) => {
   try {
-    const ref = db.ref('/product')
-    ref.once('value', snapshot => {
-      const product = snapshot.val() || []
-      res.json({ success: true, product: Object.values(product) });
-    })
+    const productRef = db.ref('/product')
+    const collectionsRef = db.ref('/collections/')
+    const [productSnap, collectionsSnap] = await Promise.all([
+      productRef.once("value"),
+      collectionsRef.once("value")
+    ])
+    const product = productSnap.val() || {}
+    const collections = collectionsSnap.val() || []
+    res.json({ success: true, product: Object.values(product), collections: collections });
   } catch (err) {
     res.json({ success: false, message: err });
   }

@@ -105,8 +105,8 @@ router.post('/create-checkout-session', async (req, res) => {
       mode: 'payment',
       // success_url: `http://localhost:3000/creditCard/${newCommand}`,
       // cancel_url: 'http://localhost:3000/main',
-      success_url: `https://clothing-shop2834.web.app/creditCard/${newCommand}`,
-      cancel_url: 'https://clothing-shop2834.web.app/main'
+      success_url: `https://blisst-clothing.web.app/creditCard/${newCommand}`,
+      cancel_url: 'https://blisst-clothing.web.app/main'
     });
     res.json({ success: true, url: session.url });
   } catch (err) {
