@@ -17,7 +17,7 @@ const productRoute = require('./routes/product')
 const app = express();
 app.use(cookieParser());
 app.use(function(req, res, next) {
-  res.setHeader('Access-Control-Allow-Origin', 'https://clothing-shop2834.web.app');
+  res.setHeader('Access-Control-Allow-Origin', 'https://blisst-clothing.web.app');
   // res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
   // res.setHeader('Access-Control-Allow-Origin', 'http://192.168.100.34:3000') 
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
