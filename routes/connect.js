@@ -127,7 +127,7 @@ router.post('/write', async (req, res, next) => {
     const ref = db.ref('/users/' + uid + '/');
     await ref.set({
       email: email, password: password,
-      det: { info: '', tel: '', email: email, name: name, type: type, newsLetter: false, county: '', color: "#ea580c" }
+      det: { info: '', tel: '', email: email, name: name, type: type, newsLetter: false, county: '', color: "#2289FF" }
     });
     res.json({ success: true })
   } catch (err) {
