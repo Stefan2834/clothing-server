@@ -10,14 +10,14 @@ router.get('/', function (req, res, next) {
   res.render('index', { title: 'Blisst server' });
 });
 
-router.post('/commandUpdate', async (req, res, next) => {
-  const { command, uid, cart } = req.body
+router.post('/orderUpdate', async (req, res, next) => {
+  const { order, uid, cart } = req.body
   try {
-    const dbRef = db.ref('commands');
-    const commands = await dbRef.once('value').then(snapshot => snapshot.val() || []);
-    const commandToPush = { ...command, uid: uid }
-    commands.push(commandToPush);
-    await dbRef.set(commands);
+    const dbRef = db.ref('orders/');
+    const orders = await dbRef.once('value').then(snapshot => snapshot.val() || []);
+    const orderToPush = { ...order, uid: uid }
+    orders.push(orderToPush);
+    await dbRef.set(orders);
     await cart.map(async cart => {
       const productRef = db.ref(`/product/${cart.id}/size/${cart.selectedSize}/`)
       await productRef.once("value", snapshot => {
@@ -39,7 +39,7 @@ router.post('/discount', async (req, res, next) => {
     const discount = snapshot.val();
 
     if (!discount) {
-      res.json({ success: false, message: "Codul este gresit sau a expirat" });
+      res.json({ success: false, message: "Codul este greșit sau a expirat" });
       return;
     }
 
@@ -87,9 +87,9 @@ router.post(`/error`, async (req, res, next) => {
 
 
 router.post('/create-checkout-session', async (req, res) => {
-  const { commandData } = req.body
+  const { orderData } = req.body
   try {
-    const newCommand = encodeURIComponent(JSON.stringify(commandData));
+    const newOrder = encodeURIComponent(JSON.stringify(orderData));
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [{
@@ -98,14 +98,14 @@ router.post('/create-checkout-session', async (req, res) => {
           product_data: {
             name: 'De plată:',
           },
-          unit_amount: (JSON.parse(commandData.price.total) * 100).toFixed(0)
+          unit_amount: (JSON.parse(orderData.price.total) * 100).toFixed(0)
         },
         quantity: 1,
       }],
       mode: 'payment',
-      // success_url: `http://localhost:3000/creditCard/${newCommand}`,
+      // success_url: `http://localhost:3000/creditCard/${newOrder}`,
       // cancel_url: 'http://localhost:3000/main',
-      success_url: `https://blisst-clothing.web.app/creditCard/${newCommand}`,
+      success_url: `https://blisst-clothing.web.app/creditCard/${newOrder}`,
       cancel_url: 'https://blisst-clothing.web.app/main'
     });
     res.json({ success: true, url: session.url });

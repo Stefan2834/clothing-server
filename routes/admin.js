@@ -4,22 +4,22 @@ const firebase = require('firebase');
 const firebaseConfig = require('./firebaseConfig')
 const db = firebase.database()
 
-router.get(`/commands`, async (req, res, next) => {
+router.get(`/orders`, async (req, res, next) => {
   try {
-    const commandsRef = db.ref("commands/")
-    await commandsRef.once("value", snapshot => {
-      const commands = snapshot.val() || []
-      res.json({ success: true, commands: commands })
+    const ordersRef = db.ref("orders/")
+    await ordersRef.once("value", snapshot => {
+      const orders = snapshot.val() || []
+      res.json({ success: true, orders: orders })
     })
   } catch (err) {
     res.json({ success: false, message: err })
   }
 })
-router.post('/commands', async (req, res, next) => {
-  const { commands } = req.body
+router.post('/orders', async (req, res, next) => {
+  const { orders } = req.body
   try {
-    const commandsRef = db.ref('commands')
-    await commandsRef.set(commands)
+    const ordersRef = db.ref('orders')
+    await ordersRef.set(orders)
   } catch (err) {
     req.json({ success: false, message: err })
   }
@@ -28,7 +28,7 @@ router.post('/commands', async (req, res, next) => {
 router.post(`/status`, async (req, res, next) => {
   const { uid, id, status } = req.body
   try {
-    const ref = db.ref('users/' + uid + '/command/' + id + '/status/')
+    const ref = db.ref('users/' + uid + '/order/' + id + '/status/')
     await ref.set(status)
     res.json({ succes: true })
   } catch (err) {
@@ -56,7 +56,7 @@ router.post('/discount', async (req, res, next) => {
     await ref.once('value', snapshot => {
       const discount = snapshot.val()
       ref.set({ ...discount, [code]: { value: value, user: [] } })
-      res.json({ succes: true, message: 'Codul a fost creat  cu succes' })
+      res.json({ succes: true, message: 'Codul a fost creat cu succes.' })
     })
   } catch (err) {
     res.json({ success: false, message: `Eroare:${err.code}` })

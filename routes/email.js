@@ -11,7 +11,7 @@ const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi()
 
 
 
-router.post('/command', async (req, res, next) => {
+router.post('/order', async (req, res, next) => {
   const { email, name, price } = req.body
   try {
     const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();

@@ -10,18 +10,18 @@ router.post('/info', async (req, res, next) => {
         const detRef = db.ref('/users/' + uid + '/det');
         const favRef = db.ref('/users/' + uid + '/favorite');
         const cartRef = db.ref('/users/' + uid + '/cart');
-        const commandRef = db.ref('/users/' + uid + '/command');
-        const [detSnap, favSnap, cartSnap, commandSnap] = await Promise.all([
+        const orderRef = db.ref('/users/' + uid + '/order');
+        const [detSnap, favSnap, cartSnap, orderSnap] = await Promise.all([
             detRef.once('value'),
             favRef.once('value'),
             cartRef.once('value'),
-            commandRef.once('value'),
+            orderRef.once('value'),
         ]);
         const data = {
             det: detSnap.val() || [],
             fav: favSnap.val() || [],
             cart: cartSnap.val() || [],
-            command: commandSnap.val() || [],
+            order: orderSnap.val() || [],
         };
         res.json({ success: true, data: data })
     } catch (err) {
@@ -73,11 +73,11 @@ router.post('/cart/add', (req, res, next) => {
 
 
 
-router.post('/command/add', (req, res, next) => {
-    const { command, uid } = req.body
+router.post('/order/add', (req, res, next) => {
+    const { order, uid } = req.body
     try {
-        const ref = db.ref('/users/' + uid + '/command')
-        ref.set(command)
+        const ref = db.ref('/users/' + uid + '/order')
+        ref.set(order)
         res.json({ succes: true })
     } catch (err) {
         res.json({ succes: false, message: err })
