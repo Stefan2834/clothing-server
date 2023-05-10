@@ -111,9 +111,9 @@ router.post('/resendEmail', async (req, res, next) => {
         });
     }).catch(err => {
       if (err.code === 'auth/user-not-found') {
-        res.json({ success: false, message: 'Utilizatorul nu exista' })
+        res.json({ success: false, message: 'Utilizatorul nu există' })
       } else if (err.code === 'auth/wrong-password') {
-        res.json({ success: false, message: 'Parola este gresita' })
+        res.json({ success: false, message: 'Parola este greșită' })
       } else {
         res.json({ success: false, message: err.code })
       }
