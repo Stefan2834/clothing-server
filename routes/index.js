@@ -14,10 +14,7 @@ router.post('/orderUpdate', async (req, res, next) => {
   const { order, uid, cart } = req.body
   try {
     const dbRef = db.ref('orders/');
-    const orders = await dbRef.once('value').then(snapshot => snapshot.val() || []);
-    const orderToPush = { ...order, uid: uid }
-    orders.push(orderToPush);
-    await dbRef.set(orders);
+    await dbRef.push({ ...order, uid: uid });
     await cart.map(async cart => {
       const productRef = db.ref(`/product/${cart.id}/size/${cart.selectedSize}/`)
       await productRef.once("value", snapshot => {
@@ -60,20 +57,19 @@ router.post('/discount', async (req, res, next) => {
 router.post('/discountOnce', async (req, res, next) => {
   const { email, code } = req.body
   try {
-    console.log(code)
     const discountRef = db.ref('discount/' + code + '/user/')
     discountRef.push(email)
+    res.json({ success: true })
   } catch (err) {
-
+    res.json({ succes: false, err: err })
   }
 })
 
 router.post(`/error`, async (req, res, next) => {
   const { email, error } = req.body
   try {
-    console.log(email, error)
     const ref = db.ref('errors')
-    ref.once('value', snapshot => {
+    await ref.once('value', snapshot => {
       const errors = snapshot.val() || []
       errors.push({ email: email, error: error })
       ref.set(errors)
