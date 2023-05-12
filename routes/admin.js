@@ -243,12 +243,55 @@ router.post(`/collectionsDelete`, async (req, res, next) => {
           return c
         }
       }).filter(c => c != null)
-      console.log(coll)
       await collRef.set(coll)
       res.json({ success: true })
     })
   } catch (err) {
     res.json({ success: false, message: err })
+  }
+})
+
+
+router.get(`/ban`, async (req, res, next) => {
+  try {
+    const banRef = db.ref('/banned/')
+    await banRef.once("value", snapshot => {
+      const ban = Object.values(snapshot.val() || {}) || []
+      res.json({ success: true, ban: ban })
+    })
+  } catch (err) {
+    res.json({ success: false, message: err })
+  }
+})
+
+
+router.post(`/ban`, async (req, res, next) => {
+  const { email, reason } = req.body
+  try {
+    const adminRef = db.ref('/admin/')
+    const snapshot = await adminRef.orderByValue().equalTo(email).once('value');
+    if (snapshot.exists()) {
+      res.json({ success: false, message: 'Nu poți bana un admin.' })
+    } else {
+      const banRef = db.ref('/banned')
+      banRef.push({ email: email, reason: reason })
+      res.json({ success: true })
+    }
+  } catch (err) {
+    res.json({ success: false, message: err })
+  }
+})
+
+router.post('/banDelete', async (req, res, next) => {
+  const { email } = req.body
+  try {
+    const banRef = db.ref(`/banned`)
+    const snapshot = await banRef.orderByChild('email').equalTo(email).once('value')
+    const key = Object.keys(snapshot.val())[0]
+    await banRef.child(key).remove()
+    res.json({ success: true })
+  } catch (err) {
+    res.json({ success: false })
   }
 })
 
