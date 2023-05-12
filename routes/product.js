@@ -34,7 +34,7 @@ router.post(`/review`, async (req, res, next) => {
 })
 
 router.post(`/review/post`, async (req, res, next) => {
-  const { review, id, user } = req.body
+  const { review, id, user, date: date } = req.body
   try {
     const reviewRef = db.ref('review/' + id)
     await reviewRef.push({
@@ -42,6 +42,7 @@ router.post(`/review/post`, async (req, res, next) => {
       star: review.star,
       user: user,
       text: review.text,
+      date: date
     })
     const starRef = db.ref(`/product/${id}/star/`)
     await starRef.once('value', snapshot => {
@@ -66,7 +67,7 @@ router.post(`/review/update`, async (req, res, next) => {
       const reviewId = Object.keys(snapshot.val())[index]
       let reviewObj = {}
       oldStar = reviews[index].star
-      reviewObj[reviewId] = { user: user, text: review.text, star: review.star, anonim: review.anonim }
+      reviewObj[reviewId] = { user: user, text: review.text, star: review.star, anonim: review.anonim, date: reviews[index].date }
       reviewRef.update(reviewObj)
     })
     let newStar

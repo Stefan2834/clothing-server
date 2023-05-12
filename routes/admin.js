@@ -203,4 +203,53 @@ router.post(`/review`, async (req, res, next) => {
   }
 })
 
+router.get(`/collections`, async (req, res, next) => {
+  try {
+    const collRef = db.ref('/collections/')
+    await collRef.once("value", snapshot => {
+      const coll = snapshot.val() || []
+      res.json({ success: true, collections: coll })
+    })
+  } catch (err) {
+    res.json({ success: false, message: err })
+  }
+})
+
+router.post(`/collections`, async (req, res, next) => {
+  const { name, photo } = req.body
+  try {
+    const collRef = db.ref('/collections')
+    await collRef.once("value", async snapshot => {
+      let coll = snapshot.val() || []
+      coll = [...coll, { name: name, photo: photo }]
+      await collRef.set(coll)
+      res.json({ success: true })
+    })
+  } catch (err) {
+    res.json({ success: false, message: err })
+  }
+})
+
+router.post(`/collectionsDelete`, async (req, res, next) => {
+  const { name } = req.body
+  try {
+    const collRef = db.ref('/collections')
+    await collRef.once("value", async snapshot => {
+      let coll = snapshot.val() || []
+      coll = await coll.map(c => {
+        if (c.name === name) {
+          return null
+        } else {
+          return c
+        }
+      }).filter(c => c != null)
+      console.log(coll)
+      await collRef.set(coll)
+      res.json({ success: true })
+    })
+  } catch (err) {
+    res.json({ success: false, message: err })
+  }
+})
+
 module.exports = router;
