@@ -8,21 +8,22 @@ router.post('/info', async (req, res, next) => {
     const { uid, email } = req.body;
     try {
         const banRef = db.ref('/banned/')
-        const snapshot = await banRef.orderByChild('email').equalTo(email).once('value');
-        if (snapshot.exists()) {
-            const key = Object.keys(snapshot.val())[0]
-            snapshot.val()[key].reason;
-            res.json({ success: false, ban: true, reason: snapshot.val()[key].reason })
+        const banSnapshot = await banRef.orderByChild('email').equalTo(email).once('value');
+        if (banSnapshot.exists()) {
+            const key = Object.keys(banSnapshot.val())[0]
+            res.json({ success: false, ban: true, reason: banSnapshot.val()[key].reason })
         } else {
             const detRef = db.ref('/users/' + uid + '/det');
             const favRef = db.ref('/users/' + uid + '/favorite');
             const cartRef = db.ref('/users/' + uid + '/cart');
             const orderRef = db.ref('/users/' + uid + '/order');
-            const [detSnap, favSnap, cartSnap, orderSnap] = await Promise.all([
+            const adminRef = db.ref('/admin/' + uid)
+            const [detSnap, favSnap, cartSnap, orderSnap, adminSnap] = await Promise.all([
                 detRef.once('value'),
                 favRef.once('value'),
                 cartRef.once('value'),
                 orderRef.once('value'),
+                adminRef.once('value')
             ]);
             const data = {
                 det: detSnap.val() || [],
@@ -30,7 +31,7 @@ router.post('/info', async (req, res, next) => {
                 cart: cartSnap.val() || [],
                 order: orderSnap.val() || [],
             };
-            res.json({ success: true, data: data, ban: false })
+            res.json({ success: true, data: data, ban: false, admin: adminSnap.val() === email})
         }
     } catch (err) {
         res.json({ succces: false, message: err })

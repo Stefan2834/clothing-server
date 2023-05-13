@@ -128,6 +128,30 @@ router.post(`/product`, async (req, res, next) => {
   }
 })
 
+router.post('/productUpdate', async (req, res, next) => {
+  const { product } = req.body
+  try {
+    const ref = db.ref(`product/${product.id}`)
+    await ref.set(product)
+    res.json({ success: true })
+  } catch (err) {
+    res.json({ success: false, message: err })
+  }
+})
+
+router.post('/productDelete', async (req, res, next) => {
+  const { id } = req.body
+  try {
+    const productRef = db.ref(`/product/${id}`)
+    await productRef.set(null)
+    const reviewRef = db.ref(`/review/${id}`)
+    await reviewRef.set(null)
+    res.json({ success: true })
+  } catch (err) {
+    res.json({ success: false, message: err })
+  }
+})
+
 router.get('/owner', async (req, res, next) => {
   try {
     const ownerRef = db.ref('/owner/')

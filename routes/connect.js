@@ -7,16 +7,9 @@ const db = firebase.database()
 
 router.get('/admin', async (req, res, next) => {
   try {
-    const adminRef = db.ref("/admin")
-    const snapshot = await adminRef.once('value');
-    const admins = Object.keys(snapshot.val())
     auth.onAuthStateChanged(function (user) {
       if (user) {
-        if (admins.includes(user.uid)) {
-          res.json({ success: true, message: 'Connected', admin: true })
-        } else {
-          res.json({ success: true, messages: 'Connected', admin: false })
-        }
+        res.json({ success: true, messages: 'Connected' })
       } else {
         res.json({ success: false, message: 'You are not connected' })
       }
