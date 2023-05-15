@@ -93,12 +93,16 @@ router.post('/order/add', (req, res, next) => {
     }
 })
 
-router.post('/product', (req, res, next) => {
+router.post('/product', async (req, res, next) => {
     const { product } = req.body
     try {
         const ref = db.ref('/product')
-        ref.set(product)
-        res.json({ succes: true })
+        await ref.once("value", snapshot => {
+            const dbProduct = snapshot.val() || {}
+            const newProduct = {...dbProduct,  ...product}
+            ref.update(newProduct)
+            res.json({ succes: true })
+        })
     } catch (err) {
         res.json({ succes: false, message: err })
     }

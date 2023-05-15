@@ -18,20 +18,19 @@ router.get(`/orders`, async (req, res, next) => {
 router.post('/orders', async (req, res, next) => {
   const { uid, id, status } = req.body;
   try {
-    const ordersRef = db.ref('orders/');
-    const snapshot = await ordersRef.once('value');
-    const orders = snapshot.val();
-    const pushId = Object.keys(orders).find((orderId) => {
-      const order = orders[orderId];
-      if (order.uid === uid && order.id === id) {
-        console.log(orderId);
-        return true;
-      }
-      return false;
-    });
-    const newRef = db.ref(`orders/${pushId}/status/`)
-    await newRef.set(status)
-    res.json({ success: true });
+      const ordersRef = db.ref('orders/');
+      const snapshot = await ordersRef.once('value');
+      const orders = snapshot.val();
+      const pushId = Object.keys(orders).find((orderId) => {
+        const order = orders[orderId];
+        if (order.uid === uid && order.id === id) {
+          return true;
+        }
+        return false;
+      });
+      const newRef = db.ref(`orders/${pushId}/status/`)
+      await newRef.set(status)
+      res.json({ success: true });
   } catch (err) {
     res.json({ success: false, message: err });
   }
@@ -42,6 +41,25 @@ router.post(`/status`, async (req, res, next) => {
   try {
     const ref = db.ref('users/' + uid + '/order/' + id + '/status/')
     await ref.set(status)
+    res.json({ success: true })
+  } catch (err) {
+    res.json({ success: false, message: err })
+  }
+})
+
+router.post('/order/cancel', async (req, res, next) => {
+  const { cart } = req.body
+  try {
+    cart.map(async cart => {
+      const productRef = db.ref(`product/${cart.id}`)
+      await productRef.once("value", snapshot => {
+        let product = snapshot.val()
+        if (product) {
+          product.size[cart.selectedSize] = parseInt(product.size[cart.selectedSize]) + parseInt(cart.number)
+          productRef.set(product)
+        }
+      })
+    })
     res.json({ success: true })
   } catch (err) {
     res.json({ success: false, message: err })
