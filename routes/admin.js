@@ -18,19 +18,19 @@ router.get(`/orders`, async (req, res, next) => {
 router.post('/orders', async (req, res, next) => {
   const { uid, id, status } = req.body;
   try {
-      const ordersRef = db.ref('orders/');
-      const snapshot = await ordersRef.once('value');
-      const orders = snapshot.val();
-      const pushId = Object.keys(orders).find((orderId) => {
-        const order = orders[orderId];
-        if (order.uid === uid && order.id === id) {
-          return true;
-        }
-        return false;
-      });
-      const newRef = db.ref(`orders/${pushId}/status/`)
-      await newRef.set(status)
-      res.json({ success: true });
+    const ordersRef = db.ref('orders/');
+    const snapshot = await ordersRef.once('value');
+    const orders = snapshot.val();
+    const pushId = Object.keys(orders).find((orderId) => {
+      const order = orders[orderId];
+      if (order.uid === uid && order.id === id) {
+        return true;
+      }
+      return false;
+    });
+    const newRef = db.ref(`orders/${pushId}/status/`)
+    await newRef.set(status)
+    res.json({ success: true });
   } catch (err) {
     res.json({ success: false, message: err });
   }
@@ -50,16 +50,14 @@ router.post(`/status`, async (req, res, next) => {
 router.post('/order/cancel', async (req, res, next) => {
   const { cart } = req.body
   try {
-    cart.map(async cart => {
-      const productRef = db.ref(`product/${cart.id}`)
-      await productRef.once("value", snapshot => {
-        let product = snapshot.val()
-        if (product) {
-          product.size[cart.selectedSize] = parseInt(product.size[cart.selectedSize]) + parseInt(cart.number)
-          productRef.set(product)
-        }
-      })
-    })
+    cart.forEach((cartItem) => {
+      const sizeRef = db.ref(`/product/${cartItem.id}/size/${cartItem.selectedSize}`);
+      sizeRef.once('value', (snapshot) => {
+        const size = snapshot.val();
+        const newSize = Number(size) + Number(cartItem.number);
+        sizeRef.set(newSize);
+      });
+    });
     res.json({ success: true })
   } catch (err) {
     res.json({ success: false, message: err })
@@ -86,12 +84,24 @@ router.post('/discount', async (req, res, next) => {
     await ref.once('value', snapshot => {
       const discount = snapshot.val()
       ref.set({ ...discount, [code]: { value: value, user: [] } })
-      res.json({ succes: true, message: 'Codul a fost creat cu succes.' })
+      res.json({ success: true, message: 'Codul a fost creat cu succes.' })
     })
   } catch (err) {
     res.json({ success: false, message: `Eroare:${err.code}` })
   }
 })
+
+router.post('/discountDelete', async (req, res, next) => {
+  const { discount } = req.body
+  try {
+    const ref = db.ref(`discount/${discount.code}`)
+    ref.set(null)
+    res.json({ success: true })
+  } catch (err) {
+    res.json({ success: false, message: `Eroare:${err.code}` })
+  }
+})
+
 
 router.get('/errors', async (req, res, next) => {
   try {
@@ -199,7 +209,7 @@ router.post('/admins', async (req, res, next) => {
   try {
     const newAdminRef = db.ref(`/admin/${uid}/`)
     newAdminRef.set(email)
-    res.json({ succes: true })
+    res.json({ success: true })
   } catch (err) {
     res.json({ success: false, message: err })
   }
