@@ -134,7 +134,7 @@ router.post(`/product`, async (req, res, next) => {
       price: Number(newProduct.price) - 0.01,
       sex: newProduct.sex,
       sliderPhoto: [newProduct.photo[1], newProduct.photo[2], newProduct.photo[3]],
-      type: newProduct.type,
+      type: newProduct.collection ? `${newProduct.type} collection ${newProduct.collection}` : newProduct.type,
       spec: newProduct.spec,
       star: { total: 0, nr: 0 },
       size: newProduct.size
