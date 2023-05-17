@@ -31,7 +31,7 @@ router.post('/info', async (req, res, next) => {
                 cart: cartSnap.val() || [],
                 order: orderSnap.val() || [],
             };
-            res.json({ success: true, data: data, ban: false, admin: adminSnap.val() === email})
+            res.json({ success: true, data: data, ban: false, admin: adminSnap.val() === email })
         }
     } catch (err) {
         res.json({ succces: false, message: err })
@@ -61,8 +61,9 @@ router.post('/infoUpdate', (req, res, next) => {
 router.post('/favorite/add', (req, res, next) => {
     const { favorite, uid } = req.body
     try {
+        const newFavorite = favorite.map(fav => { return { id: fav.id } })
         const ref = db.ref('/users/' + uid + '/favorite')
-        ref.set(favorite)
+        ref.set(newFavorite)
         res.json({ succes: true })
     } catch (err) {
         res.json({ succes: false, message: err })
@@ -72,8 +73,11 @@ router.post('/favorite/add', (req, res, next) => {
 router.post('/cart/add', (req, res, next) => {
     const { cart, uid } = req.body
     try {
+        const newCart = cart.map(cart => {
+            return { id: cart.id, selectedSize: cart.selectedSize, number: cart.number }
+        })
         const ref = db.ref('/users/' + uid + '/cart')
-        ref.set(cart)
+        ref.set(newCart)
         res.json({ succes: true })
     } catch (err) {
         res.json({ succes: false, message: err })
@@ -99,7 +103,7 @@ router.post('/product', async (req, res, next) => {
         const ref = db.ref('/product')
         await ref.once("value", snapshot => {
             const dbProduct = snapshot.val() || {}
-            const newProduct = {...dbProduct,  ...product}
+            const newProduct = { ...dbProduct, ...product }
             ref.update(newProduct)
             res.json({ succes: true })
         })
