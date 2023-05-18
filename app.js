@@ -9,7 +9,7 @@ const indexRouter = require('./routes/index');
 const connectRouter = require('./routes/connect');
 const userRouter = require('./routes/user');
 const suggestionRoute = require('./routes/suggestion')
-const emailRoute = require('./routes/email')
+const { emailRoute } = require('./routes/email')
 const adminRoute = require('./routes/admin')
 const productRoute = require('./routes/product')
 
