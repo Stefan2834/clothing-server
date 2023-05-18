@@ -9,6 +9,8 @@ const firebaseConfig = require('../routes/firebaseConfig')
 const db = firebase.database()
 const cron = require('node-cron');
 
+const { sendNewsLetterEmail } = require('../routes/email')
+
 server.listen(port, () => {
   console.log(`Server is on port:${port}`)
 });
@@ -63,16 +65,16 @@ function onListening() {
 function runAtMidnight() {
   const productsRef = db.ref('/product');
   productsRef.once('value', (snapshot) => {
-      const product = Object.values(snapshot.val());
-      const randomIndex = Math.floor(Math.random() * product.length);
-      const dailyProduct = product[randomIndex];
-      const dailyProductRef = db.ref('dailyProduct');
-      dailyProductRef.set(dailyProduct.id)
-      console.log(`Produsul zilei este: ${dailyProduct.id}`)
+    const product = Object.values(snapshot.val());
+    const randomIndex = Math.floor(Math.random() * product.length);
+    const dailyProduct = product[randomIndex];
+    const dailyProductRef = db.ref('dailyProduct');
+    dailyProductRef.set(dailyProduct.id)
+    sendNewsLetterEmail(19, { id: dailyProduct.id })
+    console.log(`Produsul zilei este: ${dailyProduct.id}`)
   });
 }
 
-cron.schedule('0 0 * * *', async function () {
-  console.log('Daily product has changed')
+cron.schedule('56 14 * * *', async function () {
   runAtMidnight()
 });
