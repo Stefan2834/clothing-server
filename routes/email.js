@@ -6,7 +6,7 @@ const db = firebase.database()
 const SibApiV3Sdk = require('sib-api-v3-sdk');
 const defaultClient = SibApiV3Sdk.ApiClient.instance;
 const apiKeyAuth = defaultClient.authentications['api-key'];
-// require('dotenv').config();
+require('dotenv').config();
 apiKeyAuth.apiKey = process.env.API_KEY;
 const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi()
 

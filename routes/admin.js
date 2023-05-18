@@ -3,6 +3,7 @@ const router = express.Router();
 const firebase = require('firebase');
 const firebaseConfig = require('./firebaseConfig')
 const db = firebase.database()
+const { sendNewsLetterEmail } = require('./email.js')
 
 router.get(`/orders`, async (req, res, next) => {
   try {
@@ -149,6 +150,7 @@ router.post(`/product`, async (req, res, next) => {
       star: { total: 0, nr: 0 },
       size: newProduct.size
     })
+    sendNewsLetterEmail(20, { photo: newProduct.photo[0], id: newProduct.id })
     res.json({ success: true });
   } catch (err) {
     console.error('Error uploading file: ', err);
