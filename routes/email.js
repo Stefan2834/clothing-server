@@ -4,9 +4,9 @@ const firebase = require('firebase');
 const firebaseConfig = require('./firebaseConfig')
 const db = firebase.database()
 const SibApiV3Sdk = require('sib-api-v3-sdk');
-const { Routes } = require('react-router-dom');
 const defaultClient = SibApiV3Sdk.ApiClient.instance;
 const apiKeyAuth = defaultClient.authentications['api-key'];
+require('dotenv').config();
 apiKeyAuth.apiKey = process.env.API_KEY;
 const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi()
 
@@ -98,6 +98,7 @@ router.post(`/reviewDeleted`, async (req, res, next) => {
 
 router.post(`/status`, async (req, res, next) => {
   const { status, email, nr } = req.body
+  console.log(status, email, nr)
   try {
     let temId = 0;
     if (status === 'Anulată') {
