@@ -51,15 +51,15 @@ router.post('/login', (req, res, next) => {
         const user = userCredential.user;
         res.json({ success: true, message: 'Logat cu succes', user: user });
       } else {
-        res.json({ success: false, message: 'Contul nu este activat. Acceseaza emailul pentru a il activa' })
+        res.json({ success: false, message: 'Contul nu este activat. Accesează emailul pentru a îl activa' })
       }
     })
     .catch((err) => {
       console.log(err)
       if (err.code === 'auth/wrong-password') {
-        res.json({ success: false, message: 'Parola sau emailul gresit' })
+        res.json({ success: false, message: 'Parola sau emailul greșit' })
       } else if (err.code === 'auth/user-not-found') {
-        res.json({ success: false, message: 'Acest cont nu exista' })
+        res.json({ success: false, message: 'Acest cont nu există' })
       } else {
         res.json({ success: false, message: err.code })
       }

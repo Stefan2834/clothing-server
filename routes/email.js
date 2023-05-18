@@ -4,6 +4,7 @@ const firebase = require('firebase');
 const firebaseConfig = require('./firebaseConfig')
 const db = firebase.database()
 const SibApiV3Sdk = require('sib-api-v3-sdk');
+const { Routes } = require('react-router-dom');
 const defaultClient = SibApiV3Sdk.ApiClient.instance;
 const apiKeyAuth = defaultClient.authentications['api-key'];
 apiKeyAuth.apiKey = process.env.API_KEY;
@@ -94,4 +95,37 @@ router.post(`/reviewDeleted`, async (req, res, next) => {
     res.json({ success: false, message: err })
   }
 })
+
+router.post(`/status`, async (req, res, next) => {
+  const { status, email } = req.body
+  try {
+    let temId = 0;
+    if (status === 'Anulată') {
+      temId = 17;
+    } else if (status === 'Se livrează') {
+      temId = 18;
+    } else if (status === 'Livrată') {
+      temId = 16;
+    }
+    if (temId !== 0) {
+      const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+      sendSmtpEmail.to = [{ email: email }];
+      sendSmtpEmail.templateId = temId;
+      sendSmtpEmail.params = { name: email };
+      apiInstance.sendTransacEmail(sendSmtpEmail)
+        .then((data) => {
+          console.log('Email send succesfuly', data)
+          res.json({ success: true, messages: `Email send succesfuly ${data}` })
+        })
+        .catch((error) => {
+          console.log('Error sending email', error)
+          res.json({ success: false, messages: `Error sending email:${error}` });
+        });
+    }
+  } catch (err) {
+    res.json({ success: false, message: err })
+  }
+})
+
+
 module.exports = router
