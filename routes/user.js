@@ -64,9 +64,9 @@ router.post('/favorite/add', (req, res, next) => {
         const newFavorite = favorite.map(fav => { return { id: fav.id } })
         const ref = db.ref('/users/' + uid + '/favorite')
         ref.set(newFavorite)
-        res.json({ succes: true })
+        res.json({ success: true })
     } catch (err) {
-        res.json({ succes: false, message: err })
+        res.json({ success: false, message: err })
     }
 })
 
@@ -78,9 +78,9 @@ router.post('/cart/add', (req, res, next) => {
         })
         const ref = db.ref('/users/' + uid + '/cart')
         ref.set(newCart)
-        res.json({ succes: true })
+        res.json({ success: true })
     } catch (err) {
-        res.json({ succes: false, message: err })
+        res.json({ success: false, message: err })
     }
 })
 
@@ -91,9 +91,9 @@ router.post('/order/add', (req, res, next) => {
     try {
         const ref = db.ref('/users/' + uid + '/order')
         ref.set(order)
-        res.json({ succes: true })
+        res.json({ success: true })
     } catch (err) {
-        res.json({ succes: false, message: err })
+        res.json({ success: false, message: err })
     }
 })
 
@@ -105,10 +105,10 @@ router.post('/product', async (req, res, next) => {
             const dbProduct = snapshot.val() || {}
             const newProduct = { ...dbProduct, ...product }
             ref.update(newProduct)
-            res.json({ succes: true })
+            res.json({ success: true })
         })
     } catch (err) {
-        res.json({ succes: false, message: err })
+        res.json({ success: false, message: err })
     }
 })
 
