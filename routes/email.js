@@ -97,7 +97,7 @@ router.post(`/reviewDeleted`, async (req, res, next) => {
 })
 
 router.post(`/status`, async (req, res, next) => {
-  const { status, email } = req.body
+  const { status, email, nr } = req.body
   try {
     let temId = 0;
     if (status === 'Anulată') {
@@ -111,7 +111,7 @@ router.post(`/status`, async (req, res, next) => {
       const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
       sendSmtpEmail.to = [{ email: email }];
       sendSmtpEmail.templateId = temId;
-      sendSmtpEmail.params = { name: email };
+      sendSmtpEmail.params = { name: email, nr: nr };
       apiInstance.sendTransacEmail(sendSmtpEmail)
         .then((data) => {
           console.log('Email send succesfuly', data)
