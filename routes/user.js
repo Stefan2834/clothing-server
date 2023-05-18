@@ -112,4 +112,26 @@ router.post('/product', async (req, res, next) => {
     }
 })
 
+router.post('/newsLetter', async (req, res, next) => {
+    const { email, value } = req.body
+    try {
+        const newsRef = db.ref(`/newsLetter`)
+        if (value) {
+            await newsRef.push(email)
+        } else {
+            await newsRef.once('value', (snapshot) => {
+                snapshot.forEach((childSnapshot) => {
+                    const childData = childSnapshot.val();
+                    if (childData === email) {
+                        childSnapshot.ref.remove()
+                    }
+                });
+            });
+        }
+        res.json({ success: true })
+    } catch (err) {
+        res.json({ success: true })
+    }
+})
+
 module.exports = router;

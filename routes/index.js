@@ -99,10 +99,10 @@ router.post('/create-checkout-session', async (req, res) => {
         quantity: 1,
       }],
       mode: 'payment',
-      success_url: `http://localhost:3000/placeOrder/${newOrder}`,
-      cancel_url: 'http://localhost:3000/main',
-      // success_url: `https://blisst-clothing.web.app/placeOrder/${newOrder}`,
-      // cancel_url: 'https://blisst-clothing.web.app/main'
+      // success_url: `http://localhost:3000/placeOrder/${newOrder}`,
+      // cancel_url: 'http://localhost:3000/main',
+      success_url: `https://blisst-clothing.web.app/placeOrder/${newOrder}`,
+      cancel_url: 'https://blisst-clothing.web.app/main'
     });
     res.json({ success: true, url: session.url });
   } catch (err) {
