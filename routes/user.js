@@ -104,7 +104,7 @@ router.post('/product', async (req, res, next) => {
         await ref.once("value", snapshot => {
             const dbProduct = snapshot.val() || {}
             const newProduct = { ...dbProduct, ...product }
-            ref.update(newProduct)
+            ref.set(newProduct)
             res.json({ success: true })
         })
     } catch (err) {

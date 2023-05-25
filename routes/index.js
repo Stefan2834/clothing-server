@@ -61,7 +61,7 @@ router.post('/discountOnce', async (req, res, next) => {
     discountRef.push(email)
     res.json({ success: true })
   } catch (err) {
-    res.json({ succes: false, err: err })
+    res.json({ success: false, err: err })
   }
 })
 

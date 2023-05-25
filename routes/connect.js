@@ -82,7 +82,7 @@ router.post('/reset', async (req, res, next) => {
     await auth.sendPasswordResetEmail(email);
     res.json({ success: true, message: `Emailul a fost trimis la ${email}` })
   } catch (err) {
-    if (err.code === 'auth/invalid-email') {
+    if (err.code === 'auth/user-not-found') {
       res.json({ success: false, message: 'Emailul este invalid' })
     } else {
       res.json({ success: false, message: err.code })
