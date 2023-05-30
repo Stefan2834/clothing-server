@@ -1,8 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const firebase = require('firebase');
-const firebaseConfig = require('./firebaseConfig')
-const db = firebase.database()
 const { Product, Collection, Review } = require('./Schema')
 
 router.get('/', async (req, res, next) => {
