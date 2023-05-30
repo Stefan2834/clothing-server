@@ -9,6 +9,7 @@ const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi()
 const { NewsLetter } = require('./Schema')
 
 
+
 const sendEmail = (id, to, params) => {
   const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
   sendSmtpEmail.to = [{ email: to }];
