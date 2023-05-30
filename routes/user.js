@@ -10,6 +10,7 @@ router.post('/info', async (req, res, next) => {
             res.json({ success: false, ban: true, reason: ban.reason })
         } else {
             const user = await User.findOne({ uid })
+            console.log(uid, user)
             const data = {
                 det: user.det,
                 fav: user.favorite,
