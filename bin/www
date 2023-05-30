@@ -8,12 +8,11 @@ const cron = require('node-cron');
 const mongoose = require("mongoose");
 const { Product, Daily } = require('../routes/Schema')
 
-
 const { sendNewsLetterEmail } = require('../routes/email')
 
 const connect = async () => {
   try {
-    await mongoose.connect("mongodb+srv://Stefan:JxTzJOUkWP2GDuwR@cluster0.vlhvegc.mongodb.net/", {
+    await mongoose.connect("mongodb+srv://Stefan:7iGe3MbcfiNC0vk7@cluster0.vlhvegc.mongodb.net/", {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     })
