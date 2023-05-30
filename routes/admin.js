@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const firebase = require('firebase');
 const firebaseConfig = require('./firebaseConfig')
+const firebase = require('firebase/app');
+require('firebase/database')
 const db = firebase.database()
 const { sendNewsLetterEmail } = require('./email.js')
 

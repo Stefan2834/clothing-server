@@ -1,5 +1,6 @@
 const express = require('express')
-const firebase = require('firebase');
+const firebase = require('firebase/app');
+require('firebase/auth')
 const firebaseConfig = {
     apiKey: "AIzaSyCIUnPKzzLfKvV2Kv5o9SHPPtpSisTiOV4",
     authDomain: "log-2834.firebaseapp.com",

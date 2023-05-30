@@ -1,8 +1,5 @@
 var express = require('express');
 var router = express.Router();
-const firebase = require('firebase');
-const firebaseConfig = require('./firebaseConfig')
-const db = firebase.database()
 const stripe = require('stripe')('sk_test_51N0nLNJak7XWs1IO8u8wQQjt9OoUFdDz2i5kdoBxsYRa41Cnc80Loj0I1Ipfn8i6hRNzGIt1NlcPqj0R8sJ6a5T300hBszp6s1');
 const { Error, Order, Product, Discount } = require('./Schema')
 
