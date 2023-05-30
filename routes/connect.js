@@ -4,6 +4,9 @@ const firebase = require('firebase');
 const firebaseConfig = require('./firebaseConfig')
 const auth = firebase.auth()
 const db = firebase.database()
+const mongoose = require("mongoose")
+const { User } = require('./Schema')
+
 
 router.get('/admin', async (req, res, next) => {
   try {
@@ -117,13 +120,17 @@ router.post('/resendEmail', async (req, res, next) => {
 router.post('/write', async (req, res, next) => {
   const { uid, password, email, name, type } = req.body;
   try {
-    const ref = db.ref('/users/' + uid + '/');
-    await ref.set({
-      email: email, password: password,
-      det: { info: '', tel: '', email: email, name: name, type: type, newsLetter: false, county: '', color: "#2289FF" }
-    });
+    const newUser = new User({
+      email: email, password: password, uid: uid,
+      det: { info: '', tel: '', email: email, name: name, type: type, newsLetter: false, county: '', color: "#2289FF" },
+      favorite: [],
+      order: [],
+      cart: []
+    })
+    await newUser.save()
     res.json({ success: true })
   } catch (err) {
+    console.log('HERE', err)
     res.json({ success: false, message: err })
   }
 })

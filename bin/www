@@ -4,15 +4,31 @@ var http = require('http');
 var port = normalizePort(process.env.PORT || '9000');
 app.set('port', port);
 var server = http.createServer(app);
-const firebase = require('firebase');
-const firebaseConfig = require('../routes/firebaseConfig')
-const db = firebase.database()
 const cron = require('node-cron');
+const mongoose = require("mongoose");
+const { Product, Daily } = require('../routes/Schema')
+
 
 const { sendNewsLetterEmail } = require('../routes/email')
 
-server.listen(port, () => {
-  console.log(`Server is on port:${port}`)
+const connect = async () => {
+  try {
+    await mongoose.connect("mongodb+srv://Stefan:JxTzJOUkWP2GDuwR@cluster0.vlhvegc.mongodb.net/", {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    })
+    console.log("Connected to MongoDB");
+  } catch (err) {
+    console.error("Error connecting to MongoDB:", err);
+  }
+}
+var port = normalizePort(process.env.PORT || '9000');
+app.set('port', port);
+
+
+server.listen(port, async () => {
+  await connect()
+  console.log(`Server is on port: ${port}`)
 });
 server.on('error', onError);
 server.on('listening', onListening);
@@ -62,19 +78,18 @@ function onListening() {
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
 }
-function runAtMidnight() {
-  const productsRef = db.ref('/product');
-  productsRef.once('value', (snapshot) => {
-    const product = Object.values(snapshot.val());
-    const randomIndex = Math.floor(Math.random() * product.length);
-    const dailyProduct = product[randomIndex];
-    const dailyProductRef = db.ref('dailyProduct');
-    dailyProductRef.set(dailyProduct.id)
+const runAtMidnight = async () => {
+  try {
+    const products = await Product.find({});
+    const randomIndex = Math.floor(Math.random() * products.length);
+    const dailyProduct = products[randomIndex];
+    await Daily.findOneAndUpdate({}, { id: dailyProduct.id }, { upsert: true });
     sendNewsLetterEmail(19, { id: dailyProduct.id })
     console.log(`Produsul zilei este: ${dailyProduct.id}`)
-  });
+  } catch (err) {
+    console.error(err)
+  }
 }
-
 cron.schedule('0 0 * * *', async function () {
   runAtMidnight()
 });

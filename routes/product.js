@@ -3,19 +3,15 @@ const router = express.Router();
 const firebase = require('firebase');
 const firebaseConfig = require('./firebaseConfig')
 const db = firebase.database()
+const { Product, Collection, Review } = require('./Schema')
 
 router.get('/', async (req, res, next) => {
   try {
-    const productRef = db.ref('/product')
-    const collectionsRef = db.ref('/collections/')
-    const [productSnap, collectionsSnap] = await Promise.all([
-      productRef.once("value"),
-      collectionsRef.once("value")
-    ])
-    const product = productSnap.val() || {}
-    const collections = collectionsSnap.val() || []
-    res.json({ success: true, product: Object.values(product), collections: collections });
+    const products = await Product.find({}) || [];
+    const collections = await Collection.find({}) || [];
+    res.json({ success: true, product: products, collections: collections });
   } catch (err) {
+    console.log(err)
     res.json({ success: false, message: err });
   }
 })
@@ -23,11 +19,12 @@ router.get('/', async (req, res, next) => {
 router.post(`/review`, async (req, res, next) => {
   const { id } = req.body
   try {
-    const reviewRef = db.ref('review/' + id)
-    reviewRef.once(`value`, snapshot => {
-      const review = snapshot.val() || {}
-      res.json({ success: true, review: Object.values(review) })
-    })
+    const reviewList = await Review.findOne({ id })
+    if (!reviewList) {
+      res.json({ success: true, review: [] })
+    } else {
+      res.json({ success: true, review: reviewList.list })
+    }
   } catch (err) {
     res.json({ success: false, message: err })
   }
@@ -36,22 +33,35 @@ router.post(`/review`, async (req, res, next) => {
 router.post(`/review/post`, async (req, res, next) => {
   const { review, id, user, date: date } = req.body
   try {
-    const reviewRef = db.ref('review/' + id)
-    await reviewRef.push({
+    const newReview = {
       anonim: review.anonim,
       star: review.star,
       user: user,
       text: review.text,
       date: date
-    })
-    const starRef = db.ref(`/product/${id}/star/`)
-    await starRef.once('value', snapshot => {
-      const star = snapshot.val()
-      const newStar = { nr: star.nr + 1, total: star.total + review.star }
-      starRef.set(newStar)
-      res.json({ success: true, star: newStar })
-    })
+    }
+    const findReview = await Review.findOne({ id })
+    if (!findReview) {
+      const createdReview = new Review({ id: id });
+      createdReview.list.push(newReview);
+      await createdReview.save();
+    } else {
+      findReview.list.push(newReview)
+      await findReview.save()
+    }
+    const star = await Product.findOneAndUpdate(
+      { id },
+      {
+        $inc: {
+          'star.total': review.star,
+          'star.nr': 1
+        }
+      },
+      { new: true }
+    );
+    res.json({ success: true, star: star.star })
   } catch (err) {
+    console.log(err)
     res.send({ success: false, message: err })
   }
 })
@@ -60,25 +70,21 @@ router.post(`/review/update`, async (req, res, next) => {
   const { review, user, id } = req.body
   try {
     let oldStar = 0;
-    const reviewRef = db.ref(`/review/${id}`)
-    await reviewRef.once('value', snapshot => {
-      const reviews = Object.values(snapshot.val() || {})
-      const index = reviews.findIndex(r => r.user === user)
-      const reviewId = Object.keys(snapshot.val())[index]
-      let reviewObj = {}
-      oldStar = reviews[index].star
-      reviewObj[reviewId] = { user: user, text: review.text, star: review.star, anonim: review.anonim, date: reviews[index].date }
-      reviewRef.update(reviewObj)
-    })
-    let newStar
-    const starRef = db.ref(`product/${id}/star`)
-    await starRef.once('value', snapshot => {
-      const star = snapshot.val()
-      console.log(oldStar)
-      newStar = { ...star, total: star.total - oldStar + review.star }
-      starRef.set(newStar)
-    })
-    res.json({ success: true, star: newStar })
+    const reviewUpdate = await Review.findOne({ id })
+    const reviewToUpdate = reviewUpdate.list.find((reviewItem) => reviewItem.user === user);
+    oldStar = reviewToUpdate.star
+    reviewToUpdate.anonim = review.anonim
+    reviewToUpdate.star = review.star;
+    reviewToUpdate.text = review.text;
+    await reviewUpdate.save()
+    const product = await Product.findOneAndUpdate({ id }, {
+      $inc: {
+        'star.total': review.star - oldStar
+      },
+    },
+      { new: true }
+    )
+    res.json({ success: true, star: product.star })
   } catch (err) {
     console.log(err)
     res.json({ success: false, message: err })
@@ -88,25 +94,20 @@ router.post(`/review/update`, async (req, res, next) => {
 router.post(`/review/delete`, async (req, res, next) => {
   const { user, id } = req.body
   try {
-    let oldStar = 0;
-    const reviewRef = db.ref(`/review/${id}`)
-    await reviewRef.once('value', snapshot => {
-      const reviews = Object.values(snapshot.val() || {})
-      const index = reviews.findIndex(r => r.user === user)
-      const reviewId = Object.keys(snapshot.val() || {})[index]
-      let reviewObj = {}
-      oldStar = reviews[index].star
-      reviewObj[reviewId] = null
-      reviewRef.update(reviewObj)
-    })
-    let newStar
-    const starRef = db.ref(`product/${id}/star/`)
-    await starRef.once('value', snapshot => {
-      const star = snapshot.val()
-      newStar = { nr: star.nr - 1, total: star.total - oldStar }
-      starRef.set(newStar)
-    })
-    res.json({ success: true, star: newStar })
+    const findReview = await Review.findOne({ id })
+    const reviewIndex = findReview.list.findIndex((reviewItem) => reviewItem.user === user);
+    const oldStar = findReview.list.find(rev => rev.user === user).star
+    findReview.list.splice(reviewIndex, 1);
+    await findReview.save();
+    const product = await Product.findOneAndUpdate({ id }, {
+      $inc: {
+        'star.total': -oldStar,
+        'star.nr': -1,
+      },
+    },
+      { new: true }
+    )
+    res.json({ success: true, star: product.star })
   } catch (err) {
     console.log(err)
     res.json({ success: false, message: err })

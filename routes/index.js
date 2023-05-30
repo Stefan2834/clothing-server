@@ -4,7 +4,7 @@ const firebase = require('firebase');
 const firebaseConfig = require('./firebaseConfig')
 const db = firebase.database()
 const stripe = require('stripe')('sk_test_51N0nLNJak7XWs1IO8u8wQQjt9OoUFdDz2i5kdoBxsYRa41Cnc80Loj0I1Ipfn8i6hRNzGIt1NlcPqj0R8sJ6a5T300hBszp6s1');
-
+const { Error, Order, Product, Discount } = require('./Schema')
 
 router.get('/', function (req, res, next) {
   res.render('index', { title: 'Blisst server' });
@@ -13,14 +13,15 @@ router.get('/', function (req, res, next) {
 router.post('/orderUpdate', async (req, res, next) => {
   const { order, uid, cart } = req.body
   try {
-    const dbRef = db.ref('orders/');
-    await dbRef.push({ ...order, uid: uid });
-    await cart.map(async cart => {
-      const productRef = db.ref(`/product/${cart.id}/size/${cart.selectedSize}/`)
-      await productRef.once("value", snapshot => {
-        const oldStoc = snapshot.val()
-        productRef.set(oldStoc - cart.number)
-      })
+    const newOrder = new Order({
+      ...order, uid: uid
+    })
+    await newOrder.save()
+    await cart.forEach(async cart => {
+      const id = cart.id
+      const product = await Product.findOne({ id })
+      product.size[cart.selectedSize] -= cart.number
+      await product.save()
     })
     res.json({ success: true })
   } catch (err) {
@@ -31,17 +32,12 @@ router.post('/orderUpdate', async (req, res, next) => {
 router.post('/discount', async (req, res, next) => {
   const { discountCode, email } = req.body;
   try {
-    const discountRef = db.ref(`discount/${discountCode}`);
-    const snapshot = await discountRef.once('value');
-    const discount = snapshot.val();
-
+    const discount = await Discount.findOne({ code: discountCode })
     if (!discount) {
       res.json({ success: false, message: "Codul este greșit sau a expirat" });
       return;
     }
-
-    const oldUser = Object.values(discount.user || []);
-    if (oldUser.includes(email)) {
+    if (discount.user.includes(email)) {
       res.json({ success: false, message: 'Ai mai folosit acest cod' });
       return;
     } else {
@@ -57,8 +53,10 @@ router.post('/discount', async (req, res, next) => {
 router.post('/discountOnce', async (req, res, next) => {
   const { email, code } = req.body
   try {
-    const discountRef = db.ref('discount/' + code + '/user/')
-    discountRef.push(email)
+    await Discount.updateOne(
+      { code },
+      { $push: { 'user': email } }
+    );
     res.json({ success: true })
   } catch (err) {
     res.json({ success: false, err: err })
@@ -68,19 +66,16 @@ router.post('/discountOnce', async (req, res, next) => {
 router.post(`/error`, async (req, res, next) => {
   const { email, error } = req.body
   try {
-    const ref = db.ref('errors')
-    await ref.once('value', snapshot => {
-      const errors = snapshot.val() || []
-      errors.push({ email: email, error: error })
-      ref.set(errors)
+    const newError = new Error({
+      email: email,
+      error: error
     })
+    await newError.save()
     res.json({ success: true, message: 'Problema a fost raportata cu succes' })
   } catch (err) {
     res.json({ success: false, message: `Eroare: ${err.code}` })
   }
 })
-
-
 
 router.post('/create-checkout-session', async (req, res) => {
   const { orderData } = req.body

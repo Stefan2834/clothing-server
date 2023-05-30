@@ -1,33 +1,39 @@
 var express = require('express');
 var router = express.Router();
-const firebase = require('firebase');
-const firebaseConfig = require('./firebaseConfig')
-const db = firebase.database()
+require('dotenv').config();
 const SibApiV3Sdk = require('sib-api-v3-sdk');
 const defaultClient = SibApiV3Sdk.ApiClient.instance;
 const apiKeyAuth = defaultClient.authentications['api-key'];
-require('dotenv').config();
 apiKeyAuth.apiKey = process.env.API_KEY;
 const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi()
+const { NewsLetter } = require('./Schema')
 
 
+const sendEmail = (id, to, params) => {
+  const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+  sendSmtpEmail.to = [{ email: to }];
+  sendSmtpEmail.templateId = id;
+  sendSmtpEmail.params = { ...params };
+  apiInstance.sendTransacEmail(sendSmtpEmail)
+    .then((data) => {
+      console.log('Email send succesfuly', data)
+      return true
+    })
+    .catch((error) => {
+      console.log('Error sending email', error)
+      return false
+    });
+}
 
-router.post('/order', async (req, res, next) => {
+router.post('/order', (req, res, next) => {
   const { email, name, price } = req.body
   try {
-    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-    sendSmtpEmail.to = [{ email: email }];
-    sendSmtpEmail.templateId = 12;
-    sendSmtpEmail.params = { name: name, price: price };
-    apiInstance.sendTransacEmail(sendSmtpEmail)
-      .then((data) => {
-        console.log('Email send succesfuly', data)
-        res.json({ success: true, messages: `Email send succesfuly ${data}` })
-      })
-      .catch((error) => {
-        console.log('Error sending email', error)
-        res.json({ success: false, messages: `Error sending email:${error}` });
-      });
+    const send = sendEmail(12, email, { name: name, price: price })
+    if (send) {
+      res.json({ success: true, messages: `Email send succesfuly ${data}` })
+    } else {
+      res.json({ success: false, messages: `Error sending email:${error}` });
+    }
   } catch (err) {
     res.json({ success: false, message: err })
   }
@@ -36,19 +42,12 @@ router.post('/order', async (req, res, next) => {
 router.post('/newsLetter', async (req, res, next) => {
   const { email, name } = req.body
   try {
-    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-    sendSmtpEmail.to = [{ email: email }];
-    sendSmtpEmail.templateId = 14;
-    sendSmtpEmail.params = { name: name };
-    apiInstance.sendTransacEmail(sendSmtpEmail)
-      .then((data) => {
-        console.log('Email send succesfuly', data)
-        res.json({ success: true, messages: `Email send succesfuly ${data}` })
-      })
-      .catch((error) => {
-        console.log('Error sending email', error)
-        res.json({ success: false, messages: `Error sending email:${error}` });
-      });
+    const send = sendEmail(14, email, { name: name })
+    if (send) {
+      res.json({ success: true, messages: `Email send succesfuly` })
+    } else {
+      res.json({ success: false, messages: `Error sending email` });
+    }
   } catch (err) {
     res.json({ success: false, message: err })
   }
@@ -57,19 +56,12 @@ router.post('/newsLetter', async (req, res, next) => {
 router.post('/error', (req, res, next) => {
   const { name, solve, error } = req.body
   try {
-    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-    sendSmtpEmail.to = [{ email: name }];
-    sendSmtpEmail.templateId = 13;
-    sendSmtpEmail.params = { name: name, solve: solve, error: error };
-    apiInstance.sendTransacEmail(sendSmtpEmail)
-      .then((data) => {
-        console.log('Email send succesfuly', data)
-        res.json({ success: true, messages: `Email send succesfuly ${data}` })
-      })
-      .catch((error) => {
-        console.log('Error sending email', error)
-        res.json({ success: false, messages: `Error sending email:${error}` });
-      });
+    const send = sendEmail(13, name, { name: name, solve: solve, error: error })
+    if (send) {
+      res.json({ success: true, messages: `Email send succesfuly` })
+    } else {
+      res.json({ success: false, messages: `Error sending email` });
+    }
   } catch (err) {
     res.json({ success: false, message: err })
   }
@@ -78,19 +70,12 @@ router.post('/error', (req, res, next) => {
 router.post(`/reviewDeleted`, async (req, res, next) => {
   const { id, email, reason } = req.body
   try {
-    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-    sendSmtpEmail.to = [{ email: email }];
-    sendSmtpEmail.templateId = 15;
-    sendSmtpEmail.params = { reason: reason, id: id };
-    apiInstance.sendTransacEmail(sendSmtpEmail)
-      .then((data) => {
-        console.log('Email send succesfuly', data)
-        res.json({ success: true, messages: `Email send succesfuly ${data}` })
-      })
-      .catch((error) => {
-        console.log('Error sending email', error)
-        res.json({ success: false, messages: `Error sending email:${error}` });
-      });
+    const send = sendEmail(13, email, { reason: reason, id: id })
+    if (send) {
+      res.json({ success: true, messages: `Email send succesfuly` })
+    } else {
+      res.json({ success: false, messages: `Error sending email` });
+    }
   } catch (err) {
     res.json({ success: false, message: err })
   }
@@ -109,19 +94,12 @@ router.post(`/status`, async (req, res, next) => {
       temId = 16;
     }
     if (temId !== 0) {
-      const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-      sendSmtpEmail.to = [{ email: email }];
-      sendSmtpEmail.templateId = temId;
-      sendSmtpEmail.params = { name: email, nr: nr };
-      apiInstance.sendTransacEmail(sendSmtpEmail)
-        .then((data) => {
-          console.log('Email send succesfuly', data)
-          res.json({ success: true, messages: `Email send succesfuly ${data}` })
-        })
-        .catch((error) => {
-          console.log('Error sending email', error)
-          res.json({ success: false, messages: `Error sending email:${error}` });
-        });
+      const send = sendEmail(temId, email, { name: email, nr: nr })
+      if (send) {
+        res.json({ success: true, messages: `Email send succesfuly` })
+      } else {
+        res.json({ success: false, messages: `Error sending email` });
+      }
     }
   } catch (err) {
     res.json({ success: false, message: err })
@@ -130,23 +108,19 @@ router.post(`/status`, async (req, res, next) => {
 
 async function sendNewsLetterEmail(templateId, params) {
   try {
-    const newsRef = db.ref('newsLetter/')
-    await newsRef.once("value", snapshot => {
-      const newsKey = snapshot.val() || {}
-      const newsValue = Object.values(newsKey)
-      newsValue.forEach(email => {
-        const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-        sendSmtpEmail.to = [{ email: email }];
-        sendSmtpEmail.templateId = templateId;
-        sendSmtpEmail.params = { ...params };
-        apiInstance.sendTransacEmail(sendSmtpEmail)
-          .then((data) => {
-            console.log('Email send succesfuly', data)
-          })
-          .catch((error) => {
-            console.log('Error sending email', error)
-          });
-      })
+    const newsValue = await NewsLetter.find({}, { email: 1 });
+    newsValue.forEach(email => {
+      const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+      sendSmtpEmail.to = [{ email: email.email }];
+      sendSmtpEmail.templateId = templateId;
+      sendSmtpEmail.params = { ...params };
+      apiInstance.sendTransacEmail(sendSmtpEmail)
+        .then((data) => {
+          console.log('Email send succesfuly', data)
+        })
+        .catch((error) => {
+          console.log('Error sending email', error)
+        });
     })
   } catch (err) { console.error(err) }
 }

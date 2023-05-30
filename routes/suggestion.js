@@ -1,19 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const firebase = require('firebase');
-const firebaseConfig = require('./firebaseConfig')
-const auth  = firebase.auth()
-const db = firebase.database()
+const { Daily } = require('./Schema')
 
-router.get('/daily', (req,res,next) => {
+router.get('/daily', async (req, res, next) => {
     try {
-        dailyRef = db.ref('/dailyProduct')
-        dailyRef.once('value', (snapshot) => {
-            const daily = snapshot.val()
-            res.json({data:daily})
-        })
+        const daily = await Daily.find({})
+        res.json({ data: daily[0].id })
     } catch (err) {
-        res.json({error:err})
+        res.json({ error: err })
     }
 })
 
