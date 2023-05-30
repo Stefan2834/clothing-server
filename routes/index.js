@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
-const stripe = require('stripe')('sk_test_51N0nLNJak7XWs1IO8u8wQQjt9OoUFdDz2i5kdoBxsYRa41Cnc80Loj0I1Ipfn8i6hRNzGIt1NlcPqj0R8sJ6a5T300hBszp6s1');
+require('dotenv').config();
+const stripe = require('stripe')(process.env.STRIPE_KEY);
 const { Error, Order, Product, Discount } = require('./Schema')
 
 router.get('/', function (req, res, next) {
@@ -91,10 +92,8 @@ router.post('/create-checkout-session', async (req, res) => {
         quantity: 1,
       }],
       mode: 'payment',
-      // success_url: `http://localhost:3000/placeOrder/${newOrder}`,
-      // cancel_url: 'http://localhost:3000/main',
-      success_url: `https://blisst-clothing.web.app/placeOrder/${newOrder}`,
-      cancel_url: 'https://blisst-clothing.web.app/main'
+      success_url: `${process.env.WEBSITE_KEY}placeOrder/${newOrder}`,
+      cancel_url: `${process.env.WEBSITE_KEY}main`
     });
     res.json({ success: true, url: session.url });
   } catch (err) {

@@ -1,7 +1,5 @@
 const express = require('express');
 const router = express.Router();
-// const firebase = require('firebase');
-// const auth = firebase.auth()
 const firebaseConfig = require('./firebaseConfig')
 const firebase = require('firebase/app')
 require('firebase/auth');
