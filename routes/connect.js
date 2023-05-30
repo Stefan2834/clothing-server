@@ -9,7 +9,6 @@ const auth = firebase.auth()
 const mongoose = require("mongoose")
 const { User } = require('./Schema')
 
-
 router.get('/admin', async (req, res, next) => {
   try {
     auth.onAuthStateChanged(function (user) {
