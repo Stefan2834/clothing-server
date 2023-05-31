@@ -59,7 +59,8 @@ const orderSchema = new mongoose.Schema({
     total: Number,
   },
   product: [productSchema],
-  status: String
+  status: String,
+  uid: String
 })
 
 const userSchema = new mongoose.Schema({
@@ -121,6 +122,14 @@ const discountSchema = new mongoose.Schema({
   code: String
 })
 
+const ownerSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    required: true,
+    unique: true
+  }
+});
+
 
 const User = mongoose.model('user', userSchema);
 const Ban = mongoose.model('ban', banSchema)
@@ -133,6 +142,7 @@ const Daily = mongoose.model('daily', dailySchema)
 const Error = mongoose.model('error', errorSchema)
 const Order = mongoose.model('order', orderSchema)
 const Discount = mongoose.model('discount', discountSchema)
+const Owner = mongoose.model('owner', ownerSchema)
 
 
 
@@ -149,5 +159,6 @@ module.exports = {
   Daily,
   Error,
   Order,
-  Discount
+  Discount,
+  Owner
 }

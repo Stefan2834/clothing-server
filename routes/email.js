@@ -1,6 +1,5 @@
 var express = require('express');
 var router = express.Router();
-require('dotenv').config();
 const SibApiV3Sdk = require('sib-api-v3-sdk');
 const defaultClient = SibApiV3Sdk.ApiClient.instance;
 const apiKeyAuth = defaultClient.authentications['api-key'];
@@ -84,7 +83,6 @@ router.post(`/reviewDeleted`, async (req, res, next) => {
 
 router.post(`/status`, async (req, res, next) => {
   const { status, email, nr } = req.body
-  console.log(status, email, nr)
   try {
     let temId = 0;
     if (status === 'Anulată') {
