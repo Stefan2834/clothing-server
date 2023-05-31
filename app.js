@@ -12,6 +12,7 @@ const suggestionRoute = require('./routes/suggestion')
 const { emailRoute } = require('./routes/email')
 const adminRoute = require('./routes/admin')
 const productRoute = require('./routes/product')
+require('dotenv').config();
 
 
 const app = express();
