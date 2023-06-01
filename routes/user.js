@@ -10,16 +10,39 @@ router.post('/info', async (req, res, next) => {
             res.json({ success: false, ban: true, reason: ban.reason })
         } else {
             const user = await User.findOne({ uid })
+            const newCart = await Promise.all(user.cart.map(async (cartItem) => {
+                const product = await Product.findOne({ id: cartItem.id });
+                if (product.size[cartItem.selectedSize] === 0) {
+                    await User.updateOne(
+                        { uid: uid },
+                        { $pull: { cart: { id: cartItem.id } } }
+                      );
+                    return null
+                } else if (cartItem.number > product.size[cartItem.selectedSize]) {
+                    await User.updateOne(
+                        { uid: uid, 'cart.id': cartItem.id },
+                        { $set: { 'cart.$.number': product.size[cartItem.selectedSize] } }
+                      );
+                    return { ...product.toObject(), selectedSize: cartItem.selectedSize, number: product.size[cartItem.selectedSize] }
+                } else {
+                    return { ...product.toObject(), selectedSize: cartItem.selectedSize, number: cartItem.number }
+                }
+            }));
+            newCart.filter(data => data != null)
+            const newFavorite = await Promise.all(user.favorite.map(async (favItem) => {
+                return await Product.findOne({ id: favItem.id });
+            }));
             const data = {
                 det: user.det,
-                fav: user.favorite,
-                cart: user.cart,
+                fav: newFavorite,
+                cart: newCart,
                 order: user.order
             }
             const admin = await Admin.findOne({ email })
             res.json({ success: true, data: data, ban: false, admin: admin ? true : false })
         }
     } catch (err) {
+        console.log(err)
         res.json({ succces: false, message: err })
     }
 })

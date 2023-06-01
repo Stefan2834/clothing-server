@@ -4,12 +4,35 @@ const { Product, Collection, Review } = require('./Schema')
 
 router.get('/', async (req, res, next) => {
   try {
-    const products = await Product.find({}) || [];
     const collections = await Collection.find({}) || [];
-    res.json({ success: true, product: products, collections: collections });
+    res.json({ success: true, collections: collections });
   } catch (err) {
     console.log(err)
     res.json({ success: false, message: err });
+  }
+})
+
+router.post('/getMany', async (req, res, next) => {
+  const { path } = req.body
+  try {
+    const products = await Product.find({ type: { $regex: path, $options: 'i' } });
+    res.json({ success: true, product: products })
+  } catch (err) {
+    res.json({ success: false, message: err.code })
+  }
+})
+
+router.post('/getOne', async (req, res, next) => {
+  const { path } = req.body
+  try {
+    const product = await Product.findOne({ id: path })
+    if (product) {
+      res.json({ success: true, product: product })
+    } else {
+      res.json({ success: false })
+    }
+  } catch (err) {
+    res.json({ success: false, message: err.code })
   }
 })
 
@@ -56,7 +79,7 @@ router.post(`/review/post`, async (req, res, next) => {
       },
       { new: true }
     );
-    res.json({ success: true, star: star.star })
+    res.json({ success: true })
   } catch (err) {
     console.log(err)
     res.send({ success: false, message: err })
@@ -81,7 +104,7 @@ router.post(`/review/update`, async (req, res, next) => {
     },
       { new: true }
     )
-    res.json({ success: true, star: product.star })
+    res.json({ success: true })
   } catch (err) {
     console.log(err)
     res.json({ success: false, message: err })
@@ -104,10 +127,31 @@ router.post(`/review/delete`, async (req, res, next) => {
     },
       { new: true }
     )
-    res.json({ success: true, star: product.star })
+    res.json({ success: true })
   } catch (err) {
     console.log(err)
     res.json({ success: false, message: err })
+  }
+})
+
+router.post(`/verifyStock`, async (req, res, next) => {
+  const { cart } = req.body
+  try {
+    let success = true;
+    await Promise.all(cart.map(async (cartItem) => {
+      const product = await Product.findOne({ id: cartItem.id });
+      if (product.size[cartItem.selectedSize] < cartItem.number) {
+        success = false;
+      }
+    }));
+    if (success) {
+      res.json({ success: true });
+    } else {
+      res.json({ success: false, message: 'Stocul nu mai este disponibil. Dă-i un refresh, iar stocul va fi updatat automat.' });
+    }
+  } catch (err) {
+    console.log(err)
+    res.json({ success: true, message: err.code })
   }
 })
 
