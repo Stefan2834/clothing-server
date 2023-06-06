@@ -16,13 +16,13 @@ router.post('/info', async (req, res, next) => {
                     await User.updateOne(
                         { uid: uid },
                         { $pull: { cart: { id: cartItem.id } } }
-                      );
+                    );
                     return null
                 } else if (cartItem.number > product.size[cartItem.selectedSize]) {
                     await User.updateOne(
                         { uid: uid, 'cart.id': cartItem.id },
                         { $set: { 'cart.$.number': product.size[cartItem.selectedSize] } }
-                      );
+                    );
                     return { ...product.toObject(), selectedSize: cartItem.selectedSize, number: product.size[cartItem.selectedSize] }
                 } else {
                     return { ...product.toObject(), selectedSize: cartItem.selectedSize, number: cartItem.number }
@@ -32,8 +32,17 @@ router.post('/info', async (req, res, next) => {
             const newFavorite = await Promise.all(user.favorite.map(async (favItem) => {
                 return await Product.findOne({ id: favItem.id });
             }));
+            let newsLetter
+            const date = Number(user.det.newsLetter)
+            if (date === '0') {
+                newsLetter = 'off'
+            } else if (date + (24 * 60 * 60 * 1000) < Date.now()) {
+                newsLetter = 'on'
+            } else {
+                newsLetter = 'pending'
+            }
             const data = {
-                det: user.det,
+                det: { ...user.det.toObject(), newsLetter: newsLetter },
                 fav: newFavorite,
                 cart: newCart,
                 order: user.order
@@ -106,8 +115,9 @@ router.post('/product', async (req, res, next) => {
 })
 
 router.post('/newsLetter', async (req, res, next) => {
-    const { email, value } = req.body
+    const { uid, email, value, date } = req.body
     try {
+        await User.findOneAndUpdate({ uid }, { $set: { 'det.newsLetter': date } })
         if (value) {
             const newNews = new NewsLetter({ email });
             await newNews.save();

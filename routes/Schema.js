@@ -6,7 +6,7 @@ const detSchema = new mongoose.Schema({
   email: String,
   name: String,
   info: String,
-  newsLetter: Boolean,
+  newsLetter: String,
   tel: String,
   type: String
 });

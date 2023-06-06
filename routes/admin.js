@@ -83,9 +83,14 @@ router.get('/discount', async (req, res, next) => {
 router.post('/discount', async (req, res, next) => {
   const { value, code } = req.body
   try {
-    const discount = new Discount({ code: code, value: value, user: [] });
-    await discount.save();
-    res.json({ success: true, message: 'Codul a fost creat cu succes.' })
+    const findDiscount = await Discount.findOne({ code })
+    if (!findDiscount) {
+      const discount = new Discount({ code: code, value: value, user: [] });
+      await discount.save();
+      res.json({ success: true, message: 'Codul a fost creat cu succes.' })
+    } else {
+      res.json({ success: false, message: 'Codul există deja.' })
+    }
   } catch (err) {
     res.json({ success: false, message: `Eroare:${err.code}` })
   }
@@ -120,29 +125,42 @@ router.post('/errors', async (req, res, next) => {
   }
 });
 
+router.get(`/product`, async (req, res, next) => {
+  try {
+    const product = await Product.find({})
+    res.json({ success: true, product: product })
+  } catch (err) {
+    res.json({ success: false })
+  }
+})
+
 router.post(`/product`, async (req, res, next) => {
   const { newProduct } = req.body
   try {
-    const setNewProduct = {
-      name: newProduct.name,
-      id: newProduct.id,
-      photo: newProduct.photo[0],
-      colors: newProduct.colors,
-      discount: (newProduct.discount / 100).toFixed(2),
-      price: Number(newProduct.price) - 0.01,
-      sex: newProduct.sex,
-      sliderPhoto: [newProduct.photo[1], newProduct.photo[2], newProduct.photo[3]],
-      type: newProduct.collection ? `${newProduct.type} collection ${newProduct.collection}` : newProduct.type,
-      spec: newProduct.spec,
-      star: { total: 0, nr: 0 },
-      size: newProduct.size
+    const findProduct = await Product.find({ id: newProduct.id })
+    if (!findProduct) {
+      const setNewProduct = {
+        name: newProduct.name,
+        id: newProduct.id,
+        photo: newProduct.photo[0],
+        colors: newProduct.colors,
+        discount: (newProduct.discount / 100).toFixed(2),
+        price: Number(newProduct.price) - 0.01,
+        sex: newProduct.sex,
+        sliderPhoto: [newProduct.photo[1], newProduct.photo[2], newProduct.photo[3]],
+        type: newProduct.collection ? `${newProduct.type} collection ${newProduct.collection}` : newProduct.type,
+        spec: newProduct.spec,
+        star: { total: 0, nr: 0 },
+        size: newProduct.size
+      }
+      const product = await new Product(setNewProduct)
+      await product.save()
+      sendNewsLetterEmail(20, { photo: newProduct.photo[0], id: newProduct.id })
+      res.json({ success: true });
+    } else {
+      res.json({ success: false, message: 'Acest id este deja folosit. Introdu altul.' })
     }
-    const product = await new Product(setNewProduct)
-    await product.save()
-    sendNewsLetterEmail(20, { photo: newProduct.photo[0], id: newProduct.id })
-    res.json({ success: true });
   } catch (err) {
-    console.error('Error uploading file: ', err);
     res.json({ success: false, message: err.message });
   }
 })
@@ -193,9 +211,24 @@ router.get('/admins', async (req, res, next) => {
 router.post('/admins', async (req, res, next) => {
   const { email } = req.body
   try {
-    const admin = await new Admin({ email: email })
-    await admin.save()
-    res.json({ success: true })
+    const findUser = await User.findOne({ email })
+    if (findUser) {
+      const findBan = await Ban.findOne({ email })
+      if (!findBan) {
+        const findAdmin = await Admin.findOne({ email })
+        if (!findAdmin) {
+          const admin = await new Admin({ email: email })
+          await admin.save()
+          res.json({ success: true })
+        } else {
+          res.json({ success: false, message: 'Acest utilizator este deja admin' })
+        }
+      } else {
+        res.json({ success: false, message: 'Acest utilizator este banat' })
+      }
+    } else {
+      res.json({ success: false, message: 'Utilizatorul nu există' })
+    }
   } catch (err) {
     res.json({ success: false, message: err })
   }
@@ -244,9 +277,14 @@ router.get(`/collections`, async (req, res, next) => {
 router.post(`/collections`, async (req, res, next) => {
   const { name, photo } = req.body
   try {
-    const coll = await new Collection({ name: name, photo: photo })
-    await coll.save()
-    res.json({ success: true })
+    const findColl = await Collection.findOne({ name })
+    if (findColl) {
+      res.json({ success: false, message: 'Această colecție deja există.' })
+    } else {
+      const coll = await new Collection({ name: name, photo: photo })
+      await coll.save()
+      res.json({ success: true })
+    }
   } catch (err) {
     res.json({ success: false, message: err })
   }
@@ -276,13 +314,23 @@ router.get(`/ban`, async (req, res, next) => {
 router.post(`/ban`, async (req, res, next) => {
   const { email, reason } = req.body
   try {
-    const admin = await Admin.find({ email })
-    if (admin.length > 0) {
-      res.json({ success: false, message: 'Nu poți bana un admin.' })
+    const findUser = await User.findOne({ email })
+    if (findUser) {
+      const admin = await Admin.findOne({ email })
+      if (admin) {
+        res.json({ success: false, message: 'Nu poți bana un admin.' })
+      } else {
+        const findBan = await Ban.findOne({ email })
+        if (findBan) {
+          res.json({ success: false, message: 'Acest utilizator este deja banat.' })
+        } else {
+          const ban = await new Ban({ email: email, reason: reason })
+          await ban.save()
+          res.json({ success: true })
+        }
+      }
     } else {
-      const ban = await new Ban({ email: email, reason: reason })
-      await ban.save()
-      res.json({ success: true })
+      res.json({ success: false, message: 'Acest utilizator nu există.' })
     }
   } catch (err) {
     res.json({ success: false, message: err })
