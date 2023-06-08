@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const stripe = require('stripe')(process.env.STRIPE_KEY);
-const { Error, Order, Product, Discount } = require('./Schema')
+const { Error, Order, Product, Discount, User } = require('./Schema')
 
 router.get('/', function (req, res, next) {
   res.render('index', { title: 'Blisst server' });
@@ -10,7 +10,8 @@ router.get('/', function (req, res, next) {
 router.post('/orderUpdate', async (req, res, next) => {
   const { order, uid, cart } = req.body
   try {
-    const newOrder = new Order({
+    await User.findOneAndUpdate({ uid }, { $push: { 'order': { ...order, uid: uid } } },)
+    const newOrder = await new Order({
       ...order, uid: uid
     })
     await newOrder.save()
@@ -22,6 +23,7 @@ router.post('/orderUpdate', async (req, res, next) => {
     })
     res.json({ success: true })
   } catch (err) {
+    console.error(err)
     res.json({ success: false, message: err })
   }
 })

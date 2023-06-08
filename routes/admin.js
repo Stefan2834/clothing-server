@@ -24,9 +24,9 @@ router.get(`/orders`, async (req, res, next) => {
   }
 })
 router.post('/orders', async (req, res, next) => {
-  const { uid, id, status } = req.body;
+  const { uid, date, status } = req.body;
   try {
-    const orders = await Order.findOne({ id, uid })
+    const orders = await Order.findOne({ date, uid })
     orders.status = status
     await orders.save()
     res.json({ success: true });
@@ -36,16 +36,11 @@ router.post('/orders', async (req, res, next) => {
 });
 
 router.post(`/status`, async (req, res, next) => {
-  const { uid, id, status } = req.body
+  const { uid, date, status } = req.body
   try {
-    const update = {
-      $set: {
-        [`order.${id}.status`]: status
-      }
-    };
-    const user = await User.findOneAndUpdate(
-      { uid },
-      update,
+    await User.findOneAndUpdate(
+      { uid: uid, 'order.date': date },
+      { $set: { 'order.$.status': status } },
       { new: true }
     );
     res.json({ success: true })

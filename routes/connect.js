@@ -121,7 +121,7 @@ router.post('/write', async (req, res, next) => {
   try {
     const newUser = new User({
       email: email, password: password, uid: uid,
-      det: { info: '', tel: '', email: email, name: name, type: type, newsLetter: false, county: '', color: "#2289FF" },
+      det: { info: '', tel: '', email: email, name: name, type: type, newsLetter: '0', county: '', color: "#2289FF" },
       favorite: [],
       order: [],
       cart: []
@@ -129,7 +129,6 @@ router.post('/write', async (req, res, next) => {
     await newUser.save()
     res.json({ success: true })
   } catch (err) {
-    console.log('HERE', err)
     res.json({ success: false, message: err })
   }
 })

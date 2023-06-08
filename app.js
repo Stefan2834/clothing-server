@@ -13,7 +13,6 @@ const { emailRoute } = require('./routes/email')
 const adminRoute = require('./routes/admin')
 const productRoute = require('./routes/product')
 
-
 const app = express();
 app.use(cookieParser());
 app.use(function(req, res, next) {

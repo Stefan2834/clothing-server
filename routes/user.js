@@ -34,7 +34,7 @@ router.post('/info', async (req, res, next) => {
             }));
             let newsLetter
             const date = Number(user.det.newsLetter)
-            if (date === '0') {
+            if (date === 0) {
                 newsLetter = 'off'
             } else if (date + (24 * 60 * 60 * 1000) < Date.now()) {
                 newsLetter = 'on'
@@ -45,7 +45,7 @@ router.post('/info', async (req, res, next) => {
                 det: { ...user.det.toObject(), newsLetter: newsLetter },
                 fav: newFavorite,
                 cart: newCart,
-                order: user.order
+                order: user.order ? user.order[user.order.length - 1] : {}
             }
             const admin = await Admin.findOne({ email })
             res.json({ success: true, data: data, ban: false, admin: admin ? true : false })
@@ -90,16 +90,6 @@ router.post('/cart/add', async (req, res, next) => {
     }
 })
 
-router.post('/order/add', async (req, res, next) => {
-    const { order, uid } = req.body
-    try {
-        await User.findOneAndUpdate({ uid }, { order: order }, { new: true });
-        res.json({ success: true })
-    } catch (err) {
-        res.json({ success: false, message: err })
-    }
-})
-
 router.post('/product', async (req, res, next) => {
     const { product } = req.body
     try {
@@ -117,16 +107,28 @@ router.post('/product', async (req, res, next) => {
 router.post('/newsLetter', async (req, res, next) => {
     const { uid, email, value, date } = req.body
     try {
-        await User.findOneAndUpdate({ uid }, { $set: { 'det.newsLetter': date } })
         if (value) {
+            await User.findOneAndUpdate({ uid }, { $set: { 'det.newsLetter': date } })
             const newNews = new NewsLetter({ email });
             await newNews.save();
         } else {
+            await User.findOneAndUpdate({ uid }, { 'det.newsLetter': '0' })
             await NewsLetter.findOneAndDelete({ email });
         }
         res.json({ success: true })
     } catch (err) {
-        res.json({ success: true })
+        res.json({ success: false })
+    }
+})
+
+
+router.post('/orders', async (req, res, next) => {
+    const { uid } = req.body
+    try {
+        const user = await User.findOne({ uid })
+        res.json({ success: true, orders: user.order || [] })
+    } catch (err) {
+        res.json({ success: false })
     }
 })
 
