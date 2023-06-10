@@ -76,12 +76,22 @@ function onListening() {
 cron.schedule('0 0 * * *', async () => {
   try {
     const products = await Product.find({});
-    const randomIndex = Math.floor(Math.random() * products.length);
-    const dailyProduct = products[randomIndex];
-    await Daily.findOneAndUpdate({}, { id: dailyProduct.id }, { upsert: true });
-    sendNewsLetterEmail(19, { id: dailyProduct.id })
-    console.log(`Produsul zilei este: ${dailyProduct.id}`)
+    const manProducts = products.filter(product => product.type.includes('barbati'));
+    const womanProducts = products.filter(product => product.type.includes('femei'));
+
+    const randomManIndex = Math.floor(Math.random() * manProducts.length);
+    const randomWomanIndex = Math.floor(Math.random() * womanProducts.length);
+
+    const dailyProductMan = manProducts[randomManIndex];
+    const dailyProductWoman = womanProducts[randomWomanIndex];
+
+    await Daily.findOneAndUpdate({}, { man: dailyProductMan.id, woman: dailyProductWoman.id }, { upsert: true });
+
+    sendNewsLetterEmail(19, { man: dailyProductMan.id, woman: dailyProductWoman.id });
+
+    console.log(`Produsul zilei pentru bărbați este: ${dailyProductMan.id}`);
+    console.log(`Produsul zilei pentru femei este: ${dailyProductWoman.id}`);
   } catch (err) {
-    console.error(err)
+    console.error(err);
   }
 });

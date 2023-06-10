@@ -83,7 +83,7 @@ router.post(`/reviewDeleted`, findNameByEmail, async (req, res, next) => {
   }
 })
 
-router.post(`/status`, findNameByEmail, async (req, res, next) => {
+router.post(`/status`, async (req, res, next) => {
   const { status, email, name } = req.body
   try {
     let temId = 0;

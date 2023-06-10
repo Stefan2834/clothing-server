@@ -8,11 +8,11 @@ router.get('/', function (req, res, next) {
 });
 
 router.post('/orderUpdate', async (req, res, next) => {
-  const { order, uid, cart } = req.body
+  const { order, uid, cart, user } = req.body
   try {
-    await User.findOneAndUpdate({ uid }, { $push: { 'order': { ...order, uid: uid } } },)
+    await User.findOneAndUpdate({ uid }, { $push: { 'order': { ...order, uid, user } } },)
     const newOrder = await new Order({
-      ...order, uid: uid
+      ...order, uid, user
     })
     await newOrder.save()
     await cart.forEach(async cart => {

@@ -50,6 +50,7 @@ const orderSchema = new mongoose.Schema({
   date: String,
   details: detSchema,
   id: Number,
+  user : String,
   method: String,
   price: {
     code: String,
@@ -108,7 +109,8 @@ const reviewSchema = new mongoose.Schema({
   }]
 });
 const dailySchema = new mongoose.Schema({
-  id: String
+  man: String,
+  woman: String
 })
 
 const errorSchema = new mongoose.Schema({
