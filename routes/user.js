@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { User, Ban, Admin, NewsLetter, Product } = require('./Schema');
+const { User, Ban, Admin, NewsLetter, Product, Order } = require('./Schema');
 
 router.post('/info', async (req, res, next) => {
     const { uid, email } = req.body;
@@ -129,6 +129,24 @@ router.post('/orders', async (req, res, next) => {
         res.json({ success: true, orders: user.order || [] })
     } catch (err) {
         res.json({ success: false })
+    }
+})
+
+router.post(`/order/cancel`, async (req, res, next) => {
+    const { uid, date } = req.body
+    console.log(uid, date)
+    try {
+        await User.findOneAndUpdate(
+            { uid: uid, 'order.date': date },
+            { $set: { 'order.$.status': 'Se anulează' } },
+            { new: true }
+        );
+        const orders = await Order.findOne({ date, uid })
+        orders.status = 'Se anulează'
+        await orders.save()
+        res.json({ success: true })
+    } catch (err) {
+        res.json({ success: false, message: err })
     }
 })
 
