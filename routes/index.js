@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+require('dotenv').config()
 const stripe = require('stripe')(process.env.STRIPE_KEY);
 const { Error, Order, Product, Discount, User } = require('./Schema')
 
@@ -98,6 +99,7 @@ router.post('/create-checkout-session', async (req, res) => {
     });
     res.json({ success: true, url: session.url });
   } catch (err) {
+    console.log(err)
     res.json({ success: false, message: err })
   }
 });
