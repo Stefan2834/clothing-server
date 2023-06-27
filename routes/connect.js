@@ -120,7 +120,7 @@ router.post('/write', async (req, res, next) => {
   const { uid, password, email, name, type } = req.body;
   try {
     const newUser = new User({
-      email: email, password: password, uid: uid,
+      email: email, uid: uid,
       det: { info: '', tel: '', email: email, name: name, type: type, newsLetter: '0', county: '', color: "#2289FF" },
       favorite: [],
       order: [],
