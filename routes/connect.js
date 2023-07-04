@@ -116,6 +116,7 @@ router.post('/resendEmail', async (req, res, next) => {
 })
 
 
+
 router.post('/write', async (req, res, next) => {
   const { uid, password, email, name, type } = req.body;
   try {
