@@ -10,88 +10,93 @@ const mongoose = require("mongoose");
 const { Product, Daily } = require('../routes/Schema')
 const { sendNewsLetterEmail } = require('../routes/email')
 
-const connect = async () => {
-  await mongoose.connect(process.env.MONGOOSE_KEY, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }).then(data => {
-    console.log("Connected to MongoDB");
-  }).catch(err => console.error("Error connecting to MongoDB:", err))
-}
-var port = normalizePort(process.env.PORT || '9000');
-app.set('port', port);
-
-
-server.listen(port, async () => {
-  await connect()
-  console.log(`Server is on port: ${port}`)
+const port = process.env.PORT || 3000; // Use the PORT environment variable or default to port 3000
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
-server.on('error', onError);
-server.on('listening', onListening);
+
+// const connect = async () => {
+//   await mongoose.connect(process.env.MONGOOSE_KEY, {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true,
+//   }).then(data => {
+//     console.log("Connected to MongoDB");
+//   }).catch(err => console.error("Error connecting to MongoDB:", err))
+// }
+// var port = normalizePort(process.env.PORT || '9000');
+// app.set('port', port);
 
 
-function normalizePort(val) {
-  var port = parseInt(val, 10);
+// server.listen(port, async () => {
+//   await connect()
+//   console.log(`Server is on port: ${port}`)
+// });
+// server.on('error', onError);
+// server.on('listening', onListening);
 
-  if (isNaN(port)) {
-    return val;
-  }
 
-  if (port >= 0) {
-    return port;
-  }
+// function normalizePort(val) {
+//   var port = parseInt(val, 10);
 
-  return false;
-}
-function onError(error) {
-  if (error.syscall !== 'listen') {
-    throw error;
-  }
+//   if (isNaN(port)) {
+//     return val;
+//   }
 
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
+//   if (port >= 0) {
+//     return port;
+//   }
 
-  switch (error.code) {
-    case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
-      process.exit(1);
-      break;
-    case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
-      process.exit(1);
-      break;
-    default:
-      throw error;
-  }
-}
-function onListening() {
-  var addr = server.address();
-  var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
-  debug('Listening on ' + bind);
-}
+//   return false;
+// }
+// function onError(error) {
+//   if (error.syscall !== 'listen') {
+//     throw error;
+//   }
 
-cron.schedule('0 0 * * *', async () => {
-  try {
-    const products = await Product.find({});
-    const manProducts = products.filter(product => product.type.includes('barbati'));
-    const womanProducts = products.filter(product => product.type.includes('femei'));
+//   var bind = typeof port === 'string'
+//     ? 'Pipe ' + port
+//     : 'Port ' + port;
 
-    const randomManIndex = Math.floor(Math.random() * manProducts.length);
-    const randomWomanIndex = Math.floor(Math.random() * womanProducts.length);
+//   switch (error.code) {
+//     case 'EACCES':
+//       console.error(bind + ' requires elevated privileges');
+//       process.exit(1);
+//       break;
+//     case 'EADDRINUSE':
+//       console.error(bind + ' is already in use');
+//       process.exit(1);
+//       break;
+//     default:
+//       throw error;
+//   }
+// }
+// function onListening() {
+//   var addr = server.address();
+//   var bind = typeof addr === 'string'
+//     ? 'pipe ' + addr
+//     : 'port ' + addr.port;
+//   debug('Listening on ' + bind);
+// }
 
-    const dailyProductMan = manProducts[randomManIndex];
-    const dailyProductWoman = womanProducts[randomWomanIndex];
+// cron.schedule('0 0 * * *', async () => {
+//   try {
+//     const products = await Product.find({});
+//     const manProducts = products.filter(product => product.type.includes('barbati'));
+//     const womanProducts = products.filter(product => product.type.includes('femei'));
 
-    await Daily.findOneAndUpdate({}, { man: dailyProductMan.id, woman: dailyProductWoman.id }, { upsert: true });
+//     const randomManIndex = Math.floor(Math.random() * manProducts.length);
+//     const randomWomanIndex = Math.floor(Math.random() * womanProducts.length);
 
-    sendNewsLetterEmail(19, { man: dailyProductMan.id, woman: dailyProductWoman.id });
+//     const dailyProductMan = manProducts[randomManIndex];
+//     const dailyProductWoman = womanProducts[randomWomanIndex];
 
-    console.log(`Produsul zilei pentru bărbați este: ${dailyProductMan.id}`);
-    console.log(`Produsul zilei pentru femei este: ${dailyProductWoman.id}`);
-  } catch (err) {
-    console.error(err);
-  }
-});
+//     await Daily.findOneAndUpdate({}, { man: dailyProductMan.id, woman: dailyProductWoman.id }, { upsert: true });
+
+//     sendNewsLetterEmail(19, { man: dailyProductMan.id, woman: dailyProductWoman.id });
+
+//     console.log(`Produsul zilei pentru bărbați este: ${dailyProductMan.id}`);
+//     console.log(`Produsul zilei pentru femei este: ${dailyProductWoman.id}`);
+//   } catch (err) {
+//     console.error(err);
+//   }
+// });
