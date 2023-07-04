@@ -23,7 +23,7 @@ app.set('port', port);
 
 
 server.listen(port, async () => {
-  await connect()
+  // await connect()
   console.log(`Server is on port: ${port}`)
 });
 server.on('error', onError);
