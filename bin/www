@@ -10,14 +10,14 @@ const mongoose = require("mongoose");
 const { Product, Daily } = require('../routes/Schema')
 const { sendNewsLetterEmail } = require('../routes/email')
 
-const connect = async () => {
-  await mongoose.connect(process.env.MONGOOSE_KEY, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }).then(data => {
-    console.log("Connected to MongoDB");
-  }).catch(err => console.error("Error connecting to MongoDB:", err))
-}
+// const connect = async () => {
+//   await mongoose.connect(process.env.MONGOOSE_KEY, {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true,
+//   }).then(data => {
+//     console.log("Connected to MongoDB");
+//   }).catch(err => console.error("Error connecting to MongoDB:", err))
+// }
 var port = normalizePort(process.env.PORT || '9000');
 app.set('port', port);
 
